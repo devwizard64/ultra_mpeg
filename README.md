@@ -7,7 +7,9 @@ more information.
 ## Using the demo
 1. Clone this repository: `git clone -r
   https://github.com/devwizard64/ultra_mpeg.git`.
-2. If you wish to use libmpeg2, place it in `libmpeg2/`.
+2. If you wish to use libmpeg2, download it here:
+  https://libmpeg2.sourceforge.io/downloads.html and place its contents in
+  `libmpeg2/`.
 3. Install ffmpeg: `apt install ffmpeg`.
 4. Install a MIPS cross compiler: `apt install gcc-mips-linux-gnu`.
   * If you are using a toolchain other than `mips-linux-gnu`, edit
