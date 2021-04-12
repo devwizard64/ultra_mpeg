@@ -9,12 +9,13 @@
 #define _UMPG_H_
 
 #include <ultra64.h>
+#include <types.h>
 
 extern struct umpg_t *umpg_init(
-    s16 x, s16 y, u16 w, u16 h, const void *start, const void *end
+    int x, int y, uint w, uint h, const void *start, const void *end
 );
 extern void umpg_free(struct umpg_t *umpg);
-extern bool umpg_update(struct umpg_t *umpg, Gfx **gfx);
-extern void umpg_resize(struct umpg_t *umpg, s16 x, s16 y, u16 w, u16 h);
+extern uint umpg_update(struct umpg_t *umpg, Gfx **gfx);
+extern void umpg_resize(struct umpg_t *umpg, int x, int y, uint w, uint h);
 
 #endif

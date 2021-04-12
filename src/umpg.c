@@ -12,6 +12,7 @@
 #include <stdlib.h>
 
 #include <ultra64.h>
+#include <types.h>
 
 #ifdef _UMPG_PL_MPEG
 #define PL_MPEG_IMPLEMENTATION
@@ -73,29 +74,34 @@ struct umpg_t
 static const Gfx gfx_umpg_start[] =
 {
     gsDPPipeSync(),
-    gsDPSetConvert(G_CV_K0, G_CV_K1, G_CV_K2, G_CV_K3, G_CV_K4, G_CV_K5),
-    gsDPSetOtherMode(
-        G_AD_DISABLE |
-        G_CD_MAGICSQ |
-        G_CK_NONE |
-        (UMPG_BILERP ? G_TC_FILTCONV : G_TC_CONV) |
-        (UMPG_BILERP ? G_TF_BILERP : G_TF_POINT) |
-        G_TT_NONE |
-        G_TL_TILE |
-        G_TD_CLAMP |
-        G_TP_NONE |
-        G_CYC_1CYCLE |
-        G_PM_NPRIMITIVE,
-        G_AC_NONE |
-        G_ZS_PIXEL |
-        G_RM_OPA_SURF | G_RM_OPA_SURF2
-    ),
+#if UMPG_BILERP
+    gsDPSetCombineMode(G_CC_DECALRGBA, G_CC_YUV2RGB),
+#else
+    gsDPSetCombineMode(G_CC_1CYUV2RGB, G_CC_1CYUV2RGB),
+#endif
     gsDPSetTile(
         G_IM_FMT_YUV, G_IM_SIZ_16b, 8, 0, G_TX_RENDERTILE, 0,
         G_TX_CLAMP | G_TX_NOMIRROR, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_CLAMP | G_TX_NOMIRROR, G_TX_NOMASK, G_TX_NOLOD
     ),
-    gsDPSetCombineMode(G_CC_1CYUV2RGB, G_CC_1CYUV2RGB),
+    gsDPSetOtherMode(
+        G_PM_NPRIMITIVE |
+        (UMPG_BILERP ? G_CYC_2CYCLE : G_CYC_1CYCLE) |
+        G_TP_NONE |
+        G_TD_CLAMP |
+        G_TL_TILE |
+        G_TT_NONE |
+        (UMPG_BILERP ? G_TF_AVERAGE : G_TF_POINT) |
+        (UMPG_BILERP ? G_TC_FILTCONV : G_TC_CONV) |
+        G_CK_NONE |
+        G_CD_MAGICSQ |
+        G_AD_DISABLE |
+        15,
+        (UMPG_BILERP ? G_RM_PASS : G_RM_OPA_SURF) | G_RM_OPA_SURF2 |
+        G_ZS_PIXEL |
+        G_AC_NONE
+    ),
+    gsDPSetConvert(G_CV_K0, G_CV_K1, G_CV_K2, G_CV_K3, G_CV_K4, G_CV_K5),
     gsSPEndDisplayList(),
 };
 
@@ -130,7 +136,7 @@ static void umpg_dma_read(struct umpg_t *umpg, size_t size)
     }
     if (size > 0)
     {
-        u32 src = (u32)umpg->src;
+        uintptr_t src = (uintptr_t)umpg->src;
         umpg->src += size;
         umpg->dma_size = size;
         osInvalDCache(umpg->dma_data, size);
@@ -141,19 +147,19 @@ static void umpg_dma_read(struct umpg_t *umpg, size_t size)
     }
 }
 
-static void umpg_gfx_init(struct umpg_t *umpg, u32 w, u32 h)
+static void umpg_gfx_init(struct umpg_t *umpg, uint w, uint h)
 {
     if (umpg->gfx == NULL)
     {
         Gfx *gfx;
-        u32  y;
-        u32  x;
-        s32  xl;
-        s32  yl;
-        s32  xh;
-        s32  yh;
-        u32 dsdx;
-        u32 dtdy;
+        uint y;
+        uint x;
+        int  xl;
+        int  yl;
+        int  xh;
+        int  yh;
+        uint dsdx;
+        uint dtdy;
     #ifdef _UMPG_PL_MPEG
         if (umpg->video_table[0] == NULL)
         {
@@ -176,21 +182,21 @@ static void umpg_gfx_init(struct umpg_t *umpg, u32 w, u32 h)
         {
             for (x = 0; x < w; x += UMPG_TW)
             {
-                s32 s;
-                s32 t;
+                int  s;
+                int  t;
             #if UMPG_BILERP
-                s32 ul;
-                s32 vl;
+                int  ul;
+                int  vl;
             #else
-                u32 ul;
-                u32 vl;
+                uint ul;
+                uint vl;
             #endif
-                u32 uh;
-                u32 vh;
-                u32 uls;
-                u32 ult;
-                u32 lrs;
-                u32 lrt;
+                uint uh;
+                uint vh;
+                uint uls;
+                uint ult;
+                uint lrs;
+                uint lrt;
                 s = 32*x - UMPG_BILERP*16;
                 t = 32*y - UMPG_BILERP*16;
                 xl = umpg->x + umpg->w*(x+      0)/w;
@@ -236,7 +242,7 @@ static void umpg_gfx_init(struct umpg_t *umpg, u32 w, u32 h)
     }
 }
 
-static void umpg_gfx_draw(struct umpg_t *umpg, Gfx **gfx, u8 *dst, u32 w)
+static void umpg_gfx_draw(struct umpg_t *umpg, Gfx **gfx, u8 *dst, uint w)
 {
     gDPSetTextureImage((*gfx)++, G_IM_FMT_YUV, G_IM_SIZ_16b, w, dst);
     gSPDisplayList((*gfx)++, gfx_umpg_start);
@@ -245,14 +251,14 @@ static void umpg_gfx_draw(struct umpg_t *umpg, Gfx **gfx, u8 *dst, u32 w)
 
 #ifdef _UMPG_PL_MPEG
 static void umpg_uyvy(
-    u8 *dst, u32 w, u32 h, const u8 *y, const u8 *u, const u8 *v
+    u8 *dst, uint w, uint h, const u8 *y, const u8 *u, const u8 *v
 )
 {
     do
     {
         const u8 *s = u;
         const u8 *t = v;
-        u32 x;
+        uint x;
         x = w;
         do
         {
@@ -313,8 +319,8 @@ static void umpg_video_decode_callback(
 )
 {
     struct umpg_t *umpg = user;
-    u32 w = frame->width;
-    u32 h = frame->height;
+    uint w = frame->width;
+    uint h = frame->height;
     u8 *dst;
     umpg_gfx_init(umpg, w, h);
     dst = umpg->video_table[umpg->video_index];
@@ -331,7 +337,7 @@ static void umpg_audio_decode_callback(
     s16 *buf;
     s16 *dst;
     const f32 *src;
-    u32 len;
+    uint len;
     buf = dst = umpg->audio_table[umpg->audio_index];
     umpg->audio_index ^= 1;
     src = samples->interleaved;
@@ -352,7 +358,7 @@ static void umpg_audio_decode_callback(
 #endif
 
 #ifdef _UMPG_LIBMPEG2
-static void umpg_gfx_sync(struct umpg_t *umpg, u32 delay)
+static void umpg_gfx_sync(struct umpg_t *umpg, uint delay)
 {
     if (delay != umpg->timer.interval)
     {
@@ -363,7 +369,7 @@ static void umpg_gfx_sync(struct umpg_t *umpg, u32 delay)
 #endif
 
 struct umpg_t *umpg_init(
-    s16 x, s16 y, u16 w, u16 h, const void *start, const void *end
+    int x, int y, uint w, uint h, const void *start, const void *end
 )
 {
     struct umpg_t *umpg = malloc(sizeof(*umpg));
@@ -391,10 +397,11 @@ struct umpg_t *umpg_init(
     umpg_dma_sync(umpg);
     umpg->plm = plm_create_with_buffer(umpg->buffer, true);
     plm_set_video_decode_callback(umpg->plm, umpg_video_decode_callback, umpg);
+    plm_video_set_no_delay(umpg->plm->video_decoder, true);
     umpg->frame_time = 2.0 / plm_get_framerate(umpg->plm);
     if (plm_get_num_audio_streams(umpg->plm) > 0)
     {
-        s32 freq;
+        int freq;
         f64 time;
         umpg->audio_table[0] =
             malloc(sizeof(s16)*2 * 2*PLM_AUDIO_SAMPLES_PER_FRAME);
@@ -445,15 +452,15 @@ void umpg_free(struct umpg_t *umpg)
     free(umpg);
 }
 
-bool umpg_update(struct umpg_t *umpg, Gfx **gfx)
+uint umpg_update(struct umpg_t *umpg, Gfx **gfx)
 {
 #ifdef _UMPG_PL_MPEG
-    u32 end = false;
+    uint end = false;
     umpg->video_gfx = *gfx;
     do
     {
         OSTime time = osGetTime();
-        f64 seconds = (s32)(time-umpg->time) / 46875000.0;
+        f64 seconds = (int)(time-umpg->time) / 46875000.0;
         if (seconds > umpg->frame_time)
         {
             seconds = umpg->frame_time;
@@ -509,7 +516,7 @@ bool umpg_update(struct umpg_t *umpg, Gfx **gfx)
 #endif
 }
 
-void umpg_resize(struct umpg_t *umpg, s16 x, s16 y, u16 w, u16 h)
+void umpg_resize(struct umpg_t *umpg, int x, int y, uint w, uint h)
 {
     umpg->x = x;
     umpg->y = y;

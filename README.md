@@ -56,7 +56,7 @@ more information.
 
 ## Documentation
 * `struct umpg_t *umpg_init(
-    s16 x, s16 y, u16 w, u16 h, const void *start, const void *end
+    int x, int y, uint w, uint h, const void *start, const void *end
 );`
   * Create an ultra_mpeg object.
   * `x`: X position of output, 10.2
@@ -68,11 +68,11 @@ more information.
 * `void umpg_free(struct umpg_t *umpg);`
   * Free an ultra_mpeg object.
   * `umpg`: ultra_mpeg object
-* `bool umpg_update(struct umpg_t *umpg, Gfx **gfx);`
+* `uint umpg_update(struct umpg_t *umpg, Gfx **gfx);`
   * Update an ultra_mpeg object.
   * `umpg`: ultra_mpeg object
   * `gfx`: Buffer to write 3 display list commands.
-* `void umpg_resize(struct umpg_t *umpg, s16 x, s16 y, u16 w, u16 h);`
+* `void umpg_resize(struct umpg_t *umpg, int x, int y, uint w, uint h);`
   * Resize an ultra_mpeg object.
   * `umpg`: ultra_mpeg object
   * `x`: X position of output, 10.2

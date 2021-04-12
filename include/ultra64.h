@@ -8,12 +8,11 @@
 #ifndef _ULTRA64_H_
 #define _ULTRA64_H_
 
+#ifndef __ASSEMBLER__
+
 /* types.h */
 #include <stddef.h>
 #include <stdint.h>
-
-#define false 0
-#define true  1
 
 typedef  int8_t  s8;
 typedef uint8_t  u8;
@@ -25,11 +24,6 @@ typedef  int64_t s64;
 typedef uint64_t u64;
 typedef float    f32;
 typedef double   f64;
-
-typedef u8 bool;
-
-#define unused __attribute__((unused))
-#define lenof(x) (sizeof((x)) / sizeof((x)[0]))
 
 /* os_thread.h */
 typedef s32 OSPri;
@@ -161,11 +155,16 @@ OSTimer;
 #define G_IM_FMT_YUV            1
 #define G_IM_SIZ_16b            2
 #define G_CCMUX_TEXEL0          1
+#define G_CCMUX_TEXEL1          2
 #define G_CCMUX_K4              7
 #define G_CCMUX_K5              15
+#define G_CCMUX_0               31
+#define G_ACMUX_TEXEL0          1
 #define G_ACMUX_SHADE           4
 #define G_ACMUX_0               7
+#define G_CC_DECALRGBA          0, 0, 0, TEXEL0, 0, 0, 0, TEXEL0
 #define G_CC_1CYUV2RGB          TEXEL0, K4, K5, TEXEL0, 0, 0, 0, SHADE
+#define G_CC_YUV2RGB            TEXEL1, K4, K5, TEXEL1, 0, 0, 0, 0
 #define G_MDSFT_ALPHACOMPARE    0
 #define G_MDSFT_ZSRCSEL         2
 #define G_MDSFT_RENDERMODE      3
@@ -189,12 +188,13 @@ OSTimer;
 #define G_TC_CONV               (0 << G_MDSFT_TEXTCONV)
 #define G_TC_FILTCONV           (5 << G_MDSFT_TEXTCONV)
 #define G_TF_POINT              (0 << G_MDSFT_TEXTFILT)
-#define G_TF_BILERP             (2 << G_MDSFT_TEXTFILT)
+#define G_TF_AVERAGE            (3 << G_MDSFT_TEXTFILT)
 #define G_TT_NONE               (0 << G_MDSFT_TEXTLUT)
 #define G_TL_TILE               (0 << G_MDSFT_TEXTLOD)
 #define G_TD_CLAMP              (0 << G_MDSFT_TEXTDETAIL)
 #define G_TP_NONE               (0 << G_MDSFT_TEXTPERSP)
 #define G_CYC_1CYCLE            (0 << G_MDSFT_CYCLETYPE)
+#define G_CYC_2CYCLE            (1 << G_MDSFT_CYCLETYPE)
 #define G_PM_NPRIMITIVE         (0 << G_MDSFT_PIPELINE)
 #define G_AC_NONE               (0 << G_MDSFT_ALPHACOMPARE)
 #define G_ZS_PIXEL              (0 << G_MDSFT_ZSRCSEL)
@@ -213,6 +213,7 @@ OSTimer;
     GBL_c##clk(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1)
 #define G_RM_OPA_SURF           RM_OPA_SURF(1)
 #define G_RM_OPA_SURF2          RM_OPA_SURF(2)
+#define G_RM_PASS               GBL_c1(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1)
 #define G_CV_K0                 175
 #define G_CV_K1                 -43
 #define G_CV_K2                 -89
@@ -401,5 +402,7 @@ Gfx;
 /* 0x80328A10 */ extern s32 osSetTimer(
     OSTimer *, OSTime, OSTime, OSMesgQueue *, OSMesg
 );
+
+#endif /* __ASSEMBLER__ */
 
 #endif /* _ULTRA64_H_ */

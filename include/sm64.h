@@ -9,10 +9,15 @@
 #define _SM64_H_
 
 #include <ultra64.h>
+#include <types.h>
 
-/* 0x802473C8 */ extern void video_gfx_start_cimg(void);
+#ifndef __ASSEMBLER__
+
+/* 0x802473C8 */ extern void video_gfx_cimg(void);
 /* 0x80247D14 */ extern void video_gfx_end(void);
 
 /* 0x8033B06C */ extern Gfx *video_gfx;
+
+#endif /* __ASSEMBLER__ */
 
 #endif /* _SM64_H_ */

@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 #include <ultra64.h>
+#include <types.h>
 #include <sm64.h>
 
 #include "mem.h"
@@ -27,7 +28,7 @@ struct umpg_t *demo_init(void)
 
 void demo_update(struct umpg_t *umpg)
 {
-    video_gfx_start_cimg();
+    video_gfx_cimg();
     umpg_update(umpg, &video_gfx);
     video_gfx_end();
 }

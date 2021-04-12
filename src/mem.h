@@ -9,6 +9,7 @@
 #define _MEM_H_
 
 #include <ultra64.h>
+#include <types.h>
 
 extern void mem_init(void);
 extern void mem_link(void *start, void *end);

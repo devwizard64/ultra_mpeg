@@ -3,12 +3,12 @@
 ;      This project is licensed under the terms of the MIT license.  See
 ;      LICENSE for more information.
 
-.definelabel seg_main_start,            0x00001000
-.definelabel main_start,                0x80246000
+.definelabel main_start,                0x00001000
+.definelabel code_main_start,           0x80246000
 
-.definelabel profiler_update,           0x80246050
+.definelabel debug_update,              0x80246050
 .definelabel scheduler_main,            0x802469B8
-.definelabel video_gfx_start_cimg,      0x802473C8
+.definelabel video_gfx_cimg,            0x802473C8
 .definelabel video_gfx_end,             0x80247D14
 .definelabel video_init,                0x80247F08
 .definelabel video_end,                 0x80248090

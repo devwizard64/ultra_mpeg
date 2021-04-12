@@ -7,24 +7,24 @@
 .include "include/ultra64.asm"
 .include "include/sm64.asm"
 
-.definelabel demo_start,                                        0x80000400
+.definelabel code_demo_start,                                   0x80000400
 
 .orga 0x00000020
 .ascii _LABEL
 
-.orga seg_main_start
-.base main_start
+.orga main_start
+.base code_main_start
 
-.org profiler_update
-init:
-    la      a0, demo_start
-    la      a1, seg_demo_start
-    la.u    a2, seg_demo_end
+.org debug_update
+mem_init_demo:
+    la      a0, code_demo_start
+    la      a1, demo_start
+    la.u    a2, demo_end
     j       mem_dma_read
-    la.l    a2, seg_demo_end
+    la.l    a2, demo_end
 .org mem_init_main2
 .skip 0x98
-    j       init
+    j       mem_init_demo
 
 .org scheduler_main
 .skip 0x24
@@ -46,7 +46,7 @@ init:
 
 .org video_init
 .skip 0x68
-    jal     video_gfx_start_cimg
+    jal     video_gfx_cimg
     nop
 
 .org video_end
@@ -80,13 +80,13 @@ init:
     lw      a0, 0x0024(sp)
     nop
 
-.orga 0x00114750 ; 0x007CC6C0
-.seg seg_demo_start
-.base demo_start
+.orga 0x00114750
+.seg demo_start
+.base code_demo_start
 .importobj _BUILD + "/main.o"
 .align 0x10
 heap_start:
-.seg seg_demo_end
+.seg demo_end
 
 .seg mpg_demo_start
 .incbin _BUILD + "/mpg/demo.mpg"
