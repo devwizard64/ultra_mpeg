@@ -1,0 +1,106 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void osAiSetFrequency(u32 frequency) */
+.globl osAiSetFrequency
+osAiSetFrequency:
+    lui     $t6, %hi(osViClock)
+    lw      $t6, %lo(osViClock)($t6)
+    mtc1    $a0, $f8
+    addiu   $sp, $sp, -0x0010
+    mtc1    $t6, $f4
+    cvt.s.w $f10, $f8
+    bgez    $a0, .L803259A0
+    cvt.s.w $f6, $f4
+    li      $at, 0x4F800000
+    mtc1    $at, $f16
+    nop
+    add.s   $f10, $f10, $f16
+.L803259A0:
+    div.s   $f18, $f6, $f10
+    li      $at, 0x3F000000
+    mtc1    $at, $f4
+    li      $a1, 0x0001
+    add.s   $f12, $f18, $f4
+    cfc1    $t7, $31
+    ctc1    $a1, $31
+    nop
+    cvt.w.s $f8, $f12
+    cfc1    $a1, $31
+    nop
+    andi    $at, $a1, 0x0004
+    andi    $a1, $a1, 0x0078
+    beqz    $a1, .L80325A24
+    li      $at, 0x4F000000
+    mtc1    $at, $f8
+    li      $a1, 0x0001
+    sub.s   $f8, $f12, $f8
+    ctc1    $a1, $31
+    nop
+    cvt.w.s $f8, $f8
+    cfc1    $a1, $31
+    nop
+    andi    $at, $a1, 0x0004
+    andi    $a1, $a1, 0x0078
+    bnez    $a1, .L80325A1C
+    nop
+    mfc1    $a1, $f8
+    li      $at, 0x80000000
+    b       .L80325A34
+    or      $a1, $a1, $at
+.L80325A1C:
+    b       .L80325A34
+    li      $a1, -0x0001
+.L80325A24:
+    mfc1    $a1, $f8
+    nop
+    bltz    $a1, .L80325A1C
+    nop
+.L80325A34:
+    ctc1    $t7, $31
+    sltiu   $at, $a1, 0x0084
+    beqz    $at, .L80325A4C
+    nop
+    b       .L80325AC8
+    li      $v0, -0x0001
+.L80325A4C:
+    li      $at, 0x0042
+    divu    $0, $a1, $at
+    mflo    $a2
+    andi    $t8, $a2, 0x00FF
+    move    $a2, $t8
+    slti    $at, $a2, 0x0011
+    bnez    $at, .L80325A70
+    nop
+    li      $a2, 0x0010
+.L80325A70:
+    addiu   $t9, $a1, -0x0001
+    lui     $t0, %hi(0xA4500010)
+    sw      $t9, %lo(0xA4500010)($t0)
+    addiu   $t1, $a2, -0x0001
+    lui     $t2, %hi(0xA4500014)
+    sw      $t1, %lo(0xA4500014)($t2)
+    li      $t3, 0x0001
+    lui     $t4, %hi(0xA4500008)
+    sw      $t3, %lo(0xA4500008)($t4)
+    lui     $t5, %hi(osViClock)
+    lw      $t5, %lo(osViClock)($t5)
+    div     $0, $t5, $a1
+    mflo    $v0
+    bnez    $a1, .L80325AB0
+    nop
+    break   7
+.L80325AB0:
+    li      $at, -0x0001
+    bne     $a1, $at, .L80325AC8
+    li      $at, 0x80000000
+    bne     $t5, $at, .L80325AC8
+    nop
+    break   6
+.L80325AC8:
+    jr      $ra
+    addiu   $sp, $sp, 0x0010

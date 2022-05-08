@@ -1,0 +1,53 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void guTranslateF(float mf[4][4], float x, float y, float z) */
+.globl guTranslateF
+guTranslateF:
+    addiu   $sp, $sp, -0x0018
+    sw      $ra, 0x0014($sp)
+    sw      $a1, 0x001C($sp)
+    sw      $a2, 0x0020($sp)
+    sw      $a3, 0x0024($sp)
+    jal     guMtxIdentF
+    sw      $a0, 0x0018($sp)
+    lw      $a0, 0x0018($sp)
+    lwc1    $f4, 0x001C($sp)
+    swc1    $f4, 0x0030($a0)
+    lwc1    $f6, 0x0020($sp)
+    swc1    $f6, 0x0034($a0)
+    lwc1    $f8, 0x0024($sp)
+    swc1    $f8, 0x0038($a0)
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0018
+    jr      $ra
+    nop
+
+/* void guTranslate(Mtx *m, float x, float y, float z) */
+.globl guTranslate
+guTranslate:
+    addiu   $sp, $sp, -0x0068
+    sw      $ra, 0x0014($sp)
+    sw      $a0, 0x0068($sp)
+    sw      $a1, 0x006C($sp)
+    sw      $a2, 0x0070($sp)
+    sw      $a3, 0x0074($sp)
+    jal     guMtxIdentF
+    addiu   $a0, $sp, 0x0028
+    lwc1    $f4, 0x006C($sp)
+    lwc1    $f6, 0x0070($sp)
+    lwc1    $f8, 0x0074($sp)
+    addiu   $a0, $sp, 0x0028
+    lw      $a1, 0x0068($sp)
+    swc1    $f4, 0x0058($sp)
+    swc1    $f6, 0x005C($sp)
+    jal     guMtxF2L
+    swc1    $f8, 0x0060($sp)
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0068
+    jr      $ra
+    nop

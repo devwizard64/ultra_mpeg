@@ -1,0 +1,45 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* OSYieldResult osSpTaskYielded(OSTask *task) */
+.globl osSpTaskYielded
+osSpTaskYielded:
+    addiu   $sp, $sp, -0x0020
+    sw      $ra, 0x0014($sp)
+    jal     __osSpGetStatus
+    sw      $a0, 0x0020($sp)
+    sw      $v0, 0x001C($sp)
+    lw      $t6, 0x001C($sp)
+    andi    $t7, $t6, 0x0100
+    beqz    $t7, .L80322DA0
+    nop
+    li      $t8, 0x0001
+    b       .L80322DA4
+    sw      $t8, 0x0018($sp)
+.L80322DA0:
+    sw      $0, 0x0018($sp)
+.L80322DA4:
+    lw      $t9, 0x001C($sp)
+    andi    $t0, $t9, 0x0080
+    beqz    $t0, .L80322DDC
+    nop
+    lw      $t1, 0x0020($sp)
+    lw      $t3, 0x0018($sp)
+    li      $at, -0x0003
+    lw      $t2, 0x0004($t1)
+    or      $t4, $t2, $t3
+    sw      $t4, 0x0004($t1)
+    lw      $t5, 0x0020($sp)
+    lw      $t6, 0x0004($t5)
+    and     $t7, $t6, $at
+    sw      $t7, 0x0004($t5)
+.L80322DDC:
+    lw      $ra, 0x0014($sp)
+    lw      $v0, 0x0018($sp)
+    addiu   $sp, $sp, 0x0020
+    jr      $ra
+    nop

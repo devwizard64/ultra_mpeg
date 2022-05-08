@@ -1,0 +1,58 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+.globl __osSiRawStartDma
+__osSiRawStartDma:
+    addiu   $sp, $sp, -0x0018
+    sw      $ra, 0x0014($sp)
+    sw      $a0, 0x0018($sp)
+    jal     __osSiDeviceBusy
+    sw      $a1, 0x001C($sp)
+    beqz    $v0, .L80328984
+    nop
+    b       .L803289FC
+    li      $v0, -0x0001
+.L80328984:
+    lw      $t6, 0x0018($sp)
+    li      $at, 0x0001
+    bne     $t6, $at, .L803289A0
+    nop
+    lw      $a0, 0x001C($sp)
+    jal     osWritebackDCache
+    li      $a1, 0x0040
+.L803289A0:
+    jal     osVirtualToPhysical
+    lw      $a0, 0x001C($sp)
+    lui     $t7, %hi(0xA4800000)
+    sw      $v0, %lo(0xA4800000)($t7)
+    lw      $t8, 0x0018($sp)
+    bnez    $t8, .L803289D0
+    nop
+    lui     $t9, 0x1FC007C0 >> 16
+    ori     $t9, 0x1FC007C0 & 0xFFFF
+    lui     $t0, %hi(0xA4800004)
+    b       .L803289E0
+    sw      $t9, %lo(0xA4800004)($t0)
+.L803289D0:
+    lui     $t1, 0x1FC007C0 >> 16
+    ori     $t1, 0x1FC007C0 & 0xFFFF
+    lui     $t2, %hi(0xA4800010)
+    sw      $t1, %lo(0xA4800010)($t2)
+.L803289E0:
+    lw      $t3, 0x0018($sp)
+    bnez    $t3, .L803289F8
+    nop
+    lw      $a0, 0x001C($sp)
+    jal     osInvalDCache
+    li      $a1, 0x0040
+.L803289F8:
+    move    $v0, $0
+.L803289FC:
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0018
+    jr      $ra
+    nop

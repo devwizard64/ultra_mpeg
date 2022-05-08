@@ -5,21 +5,18 @@
  *     LICENSE for more information.                                          *
  ******************************************************************************/
 
-#ifndef __UMPG_H__
-#define __UMPG_H__
-
 #include <ultra64.h>
 
-typedef struct umpg UMPG;
-
-extern UMPG *umpg_init(
-    int x, int y, unsigned int w, unsigned int h,
-    const void *start, const void *end
-);
-extern void umpg_free(UMPG *umpg);
-extern int umpg_update(UMPG *umpg, Gfx **gfx);
-extern void umpg_resize(
-    UMPG *umpg, int x, int y, unsigned int w, unsigned int h
-);
-
-#endif /* __UMPG_H__ */
+int memcmp(const void *s1, const void *s2, size_t n)
+{
+    const unsigned char *c1 = s1;
+    const unsigned char *c2 = s2;
+    while (n-- > 0)
+    {
+        unsigned char a = *c1++;
+        unsigned char b = *c2++;
+        if (a < b) return -1;
+        if (a > b) return +1;
+    }
+    return 0;
+}

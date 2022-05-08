@@ -1,0 +1,53 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void guScaleF(float mf[4][4], float x, float y, float z) */
+.globl guScaleF
+guScaleF:
+    addiu   $sp, $sp, -0x0018
+    sw      $ra, 0x0014($sp)
+    sw      $a1, 0x001C($sp)
+    sw      $a2, 0x0020($sp)
+    sw      $a3, 0x0024($sp)
+    jal     guMtxIdentF
+    sw      $a0, 0x0018($sp)
+    lw      $a0, 0x0018($sp)
+    lwc1    $f4, 0x001C($sp)
+    li      $at, 0x3F800000
+    mtc1    $at, $f10
+    swc1    $f4, 0x0000($a0)
+    lwc1    $f6, 0x0020($sp)
+    swc1    $f6, 0x0014($a0)
+    lwc1    $f8, 0x0024($sp)
+    swc1    $f10, 0x003C($a0)
+    swc1    $f8, 0x0028($a0)
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0018
+    jr      $ra
+    nop
+
+/* void guScale(Mtx *m, float x, float y, float z) */
+.globl guScale
+guScale:
+    mtc1    $a1, $f12
+    mtc1    $a2, $f14
+    mtc1    $a3, $f16
+    addiu   $sp, $sp, -0x0058
+    sw      $ra, 0x0014($sp)
+    sw      $a0, 0x0058($sp)
+    mfc1    $a1, $f12
+    mfc1    $a2, $f14
+    mfc1    $a3, $f16
+    jal     guScaleF
+    addiu   $a0, $sp, 0x0018
+    addiu   $a0, $sp, 0x0018
+    jal     guMtxF2L
+    lw      $a1, 0x0058($sp)
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0058
+    jr      $ra
+    nop

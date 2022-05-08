@@ -1,0 +1,200 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+.set fp=32
+
+.align 4
+
+/* void guPerspectiveF(
+    float mf[4][4],
+    u16 *perspNorm,
+    float fovy,
+    float aspect,
+    float near,
+    float far,
+    float scale
+) */
+.globl guPerspectiveF
+guPerspectiveF:
+    addiu   $sp, $sp, -0x0030
+    mtc1    $a2, $f14
+    sw      $ra, 0x0014($sp)
+    sw      $a3, 0x003C($sp)
+    sw      $a0, 0x0030($sp)
+    sw      $a1, 0x0034($sp)
+    jal     guMtxIdentF
+    swc1    $f14, 0x0038($sp)
+    lwc1    $f14, 0x0038($sp)
+    lui     $at, %hi(guPerspectiveF__803397B0)
+    ldc1    $f6, %lo(guPerspectiveF__803397B0)($at)
+    cvt.d.s $f4, $f14
+    li      $at, 0x40000000
+    mul.d   $f8, $f4, $f6
+    mtc1    $at, $f10
+    cvt.s.d $f14, $f8
+    div.s   $f12, $f14, $f10
+    jal     cosf
+    swc1    $f12, 0x001C($sp)
+    lwc1    $f12, 0x001C($sp)
+    jal     sinf
+    swc1    $f0, 0x0020($sp)
+    lwc1    $f4, 0x0020($sp)
+    lwc1    $f6, 0x003C($sp)
+    lwc1    $f14, 0x0040($sp)
+    div.s   $f2, $f4, $f0
+    lwc1    $f16, 0x0044($sp)
+    li      $at, 0xBF800000
+    mtc1    $at, $f4
+    add.s   $f18, $f14, $f16
+    lw      $v0, 0x0030($sp)
+    li      $at, 0x40000000
+    sub.s   $f12, $f14, $f16
+    lw      $a1, 0x0034($sp)
+    swc1    $f4, 0x002C($v0)
+    move    $v1, $0
+    li      $a0, 0x0004
+    div.s   $f10, $f18, $f12
+    swc1    $f2, 0x0014($v0)
+    div.s   $f8, $f2, $f6
+    mtc1    $at, $f6
+    swc1    $f10, 0x0028($v0)
+    swc1    $f8, 0x0000($v0)
+    mul.s   $f8, $f6, $f14
+    mtc1    $0, $f6
+    nop
+    swc1    $f6, 0x003C($v0)
+    mul.s   $f10, $f8, $f16
+    div.s   $f4, $f10, $f12
+    swc1    $f4, 0x0038($v0)
+    lwc1    $f0, 0x0048($sp)
+    lwc1    $f6, 0x0000($v0)
+    addiu   $v1, $v1, 0x0001
+    lwc1    $f16, 0x0004($v0)
+    mul.s   $f10, $f6, $f0
+    lwc1    $f12, 0x0008($v0)
+    beq     $v1, $a0, .L80324F04
+    lwc1    $f14, 0x000C($v0)
+.L80324EC8:
+    mul.s   $f8, $f16, $f0
+    lwc1    $f6, 0x0010($v0)
+    lwc1    $f16, 0x0014($v0)
+    mul.s   $f4, $f12, $f0
+    lwc1    $f12, 0x0018($v0)
+    addiu   $v1, $v1, 0x0001
+    mul.s   $f2, $f14, $f0
+    lwc1    $f14, 0x001C($v0)
+    swc1    $f10, 0x0000($v0)
+    mul.s   $f10, $f6, $f0
+    swc1    $f8, 0x0004($v0)
+    swc1    $f4, 0x0008($v0)
+    addiu   $v0, $v0, 0x0010
+    bne     $v1, $a0, .L80324EC8
+    swc1    $f2, -0x0004($v0)
+.L80324F04:
+    mul.s   $f8, $f16, $f0
+    addiu   $v0, $v0, 0x0010
+    swc1    $f10, -0x0010($v0)
+    mul.s   $f4, $f12, $f0
+    nop
+    mul.s   $f2, $f14, $f0
+    swc1    $f8, -0x000C($v0)
+    swc1    $f4, -0x0008($v0)
+    swc1    $f2, -0x0004($v0)
+    beqz    $a1, .L80325000
+    li      $at, 0x40000000
+    mtc1    $at, $f9
+    mtc1    $0, $f8
+    cvt.d.s $f0, $f18
+    li      $t6, 0xFFFF
+    c.le.d  $f0, $f8
+    li      $at, 0x41000000
+    bc1fl   .L80324F5C
+    mtc1    $at, $f11
+    b       .L80325000
+    sh      $t6, 0x0000($a1)
+    mtc1    $at, $f11
+.L80324F5C:
+    mtc1    $0, $f10
+    li      $t8, 0x0001
+    li      $at, 0x41E00000
+    div.d   $f4, $f10, $f0
+    li      $t0, 0x0001
+    cfc1    $t7, $31
+    ctc1    $t8, $31
+    nop
+    cvt.w.d $f6, $f4
+    cfc1    $t8, $31
+    nop
+    andi    $t8, $t8, 0x0078
+    beqzl   $t8, .L80324FE0
+    mfc1    $t8, $f6
+    mtc1    $at, $f7
+    mtc1    $0, $f6
+    li      $t8, 0x0001
+    sub.d   $f6, $f4, $f6
+    ctc1    $t8, $31
+    nop
+    cvt.w.d $f6, $f6
+    cfc1    $t8, $31
+    nop
+    andi    $t8, $t8, 0x0078
+    bnez    $t8, .L80324FD4
+    nop
+    mfc1    $t8, $f6
+    li      $at, 0x80000000
+    b       .L80324FEC
+    or      $t8, $t8, $at
+.L80324FD4:
+    b       .L80324FEC
+    li      $t8, -0x0001
+    mfc1    $t8, $f6
+.L80324FE0:
+    nop
+    bltz    $t8, .L80324FD4
+    nop
+.L80324FEC:
+    ctc1    $t7, $31
+    andi    $t9, $t8, 0xFFFF
+    bgtz    $t9, .L80325000
+    sh      $t8, 0x0000($a1)
+    sh      $t0, 0x0000($a1)
+.L80325000:
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0030
+    jr      $ra
+    nop
+
+/* void guPerspective(
+    Mtx *m,
+    u16 *perspNorm,
+    float fovy,
+    float aspect,
+    float near,
+    float far,
+    float scale
+) */
+.globl guPerspective
+guPerspective:
+    addiu   $sp, $sp, -0x0068
+    mtc1    $a2, $f12
+    mtc1    $a3, $f14
+    lwc1    $f4, 0x0078($sp)
+    lwc1    $f6, 0x007C($sp)
+    lwc1    $f8, 0x0080($sp)
+    sw      $ra, 0x0024($sp)
+    sw      $a0, 0x0068($sp)
+    mfc1    $a2, $f12
+    mfc1    $a3, $f14
+    addiu   $a0, $sp, 0x0028
+    swc1    $f4, 0x0010($sp)
+    swc1    $f6, 0x0014($sp)
+    jal     guPerspectiveF
+    swc1    $f8, 0x0018($sp)
+    addiu   $a0, $sp, 0x0028
+    jal     guMtxF2L
+    lw      $a1, 0x0068($sp)
+    lw      $ra, 0x0024($sp)
+    addiu   $sp, $sp, 0x0068
+    jr      $ra
+    nop

@@ -1,0 +1,102 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void osJamMesg(OSMesgQueue *mq, OSMesg msg, s32 flag) */
+.globl osJamMesg
+osJamMesg:
+    addiu   $sp, $sp, -0x0028
+    sw      $ra, 0x001C($sp)
+    sw      $a0, 0x0028($sp)
+    sw      $a1, 0x002C($sp)
+    sw      $a2, 0x0030($sp)
+    sw      $s1, 0x0018($sp)
+    jal     __osDisableInt
+    sw      $s0, 0x0014($sp)
+    lw      $t6, 0x0028($sp)
+    move    $s0, $v0
+    lw      $t7, 0x0008($t6)
+    lw      $t8, 0x0010($t6)
+    slt     $at, $t7, $t8
+    bnez    $at, .L80329068
+    nop
+.L8032900C:
+    lw      $t9, 0x0030($sp)
+    li      $at, 0x0001
+    bne     $t9, $at, .L80329040
+    nop
+    lui     $t1, %hi(__osRunningThread)
+    lw      $t1, %lo(__osRunningThread)($t1)
+    li      $t0, 0x0008
+    sh      $t0, 0x0010($t1)
+    lw      $a0, 0x0028($sp)
+    jal     __osEnqueueAndYield
+    addiu   $a0, $a0, 0x0004
+    b       .L80329050
+    nop
+.L80329040:
+    jal     __osRestoreInt
+    move    $a0, $s0
+    b       .L8032910C
+    li      $v0, -0x0001
+.L80329050:
+    lw      $t2, 0x0028($sp)
+    lw      $t3, 0x0008($t2)
+    lw      $t4, 0x0010($t2)
+    slt     $at, $t3, $t4
+    beqz    $at, .L8032900C
+    nop
+.L80329068:
+    lw      $t5, 0x0028($sp)
+    lw      $t6, 0x000C($t5)
+    lw      $t7, 0x0010($t5)
+    addu    $t8, $t6, $t7
+    addiu   $t9, $t8, -0x0001
+    div     $0, $t9, $t7
+    mfhi    $t0
+    sw      $t0, 0x000C($t5)
+    lw      $t2, 0x0028($sp)
+    lw      $t1, 0x002C($sp)
+    bnez    $t7, .L8032909C
+    nop
+    break   7
+.L8032909C:
+    li      $at, -0x0001
+    bne     $t7, $at, .L803290B4
+    li      $at, 0x80000000
+    bne     $t9, $at, .L803290B4
+    nop
+    break   6
+.L803290B4:
+    lw      $t4, 0x000C($t2)
+    lw      $t3, 0x0014($t2)
+    sll     $t6, $t4, 2
+    addu    $t8, $t3, $t6
+    sw      $t1, 0x0000($t8)
+    lw      $t9, 0x0028($sp)
+    lw      $t7, 0x0008($t9)
+    addiu   $t0, $t7, 0x0001
+    sw      $t0, 0x0008($t9)
+    lw      $t5, 0x0028($sp)
+    lw      $t2, 0x0000($t5)
+    lw      $t4, 0x0000($t2)
+    beqz    $t4, .L80329100
+    nop
+    jal     __osPopThread
+    move    $a0, $t5
+    move    $s1, $v0
+    jal     osStartThread
+    move    $a0, $s1
+.L80329100:
+    jal     __osRestoreInt
+    move    $a0, $s0
+    move    $v0, $0
+.L8032910C:
+    lw      $ra, 0x001C($sp)
+    lw      $s0, 0x0014($sp)
+    lw      $s1, 0x0018($sp)
+    jr      $ra
+    addiu   $sp, $sp, 0x0028

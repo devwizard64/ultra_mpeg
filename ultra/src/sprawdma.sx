@@ -1,0 +1,48 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+.globl __osSpRawStartDma
+__osSpRawStartDma:
+    addiu   $sp, $sp, -0x0018
+    sw      $ra, 0x0014($sp)
+    sw      $a0, 0x0018($sp)
+    sw      $a1, 0x001C($sp)
+    sw      $a2, 0x0020($sp)
+    jal     __osSpDeviceBusy
+    sw      $a3, 0x0024($sp)
+    beqz    $v0, .L80327FAC
+    nop
+    b       .L80327FFC
+    li      $v0, -0x0001
+.L80327FAC:
+    lw      $t6, 0x001C($sp)
+    lui     $t7, %hi(0xA4040000)
+    sw      $t6, %lo(0xA4040000)($t7)
+    jal     osVirtualToPhysical
+    lw      $a0, 0x0020($sp)
+    lui     $t8, %hi(0xA4040004)
+    sw      $v0, %lo(0xA4040004)($t8)
+    lw      $t9, 0x0018($sp)
+    bnez    $t9, .L80327FE8
+    nop
+    lw      $t0, 0x0024($sp)
+    lui     $t2, %hi(0xA404000C)
+    addiu   $t1, $t0, -0x0001
+    b       .L80327FF8
+    sw      $t1, %lo(0xA404000C)($t2)
+.L80327FE8:
+    lw      $t3, 0x0024($sp)
+    lui     $t5, %hi(0xA4040008)
+    addiu   $t4, $t3, -0x0001
+    sw      $t4, %lo(0xA4040008)($t5)
+.L80327FF8:
+    move    $v0, $0
+.L80327FFC:
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0018
+    jr      $ra
+    nop

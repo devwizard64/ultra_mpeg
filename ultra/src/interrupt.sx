@@ -1,0 +1,27 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+.globl __osDisableInt
+__osDisableInt:
+    mfc0    $t0, C0_SR
+    li      $at, -0x0002
+    and     $t1, $t0, $at
+    mtc0    $t1, C0_SR
+    andi    $v0, $t0, 0x0001
+    nop
+    jr      $ra
+    nop
+
+.globl __osRestoreInt
+__osRestoreInt:
+    mfc0    $t0, C0_SR
+    or      $t0, $t0, $a0
+    mtc0    $t0, C0_SR
+    nop
+    nop
+    jr      $ra
+    nop

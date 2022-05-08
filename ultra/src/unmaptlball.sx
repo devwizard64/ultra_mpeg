@@ -1,0 +1,28 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void osUnmapTLBAll(void) */
+.globl osUnmapTLBAll
+osUnmapTLBAll:
+    mfc0    $t0, C0_ENTRYHI
+    li      $t1, 0x001F
+    li      $t2, 0x80000000
+    mtc0    $t2, C0_ENTRYHI
+    mtc0    $0, C0_ENTRYLO0
+    mtc0    $0, C0_ENTRYLO1
+.L803224B8:
+    mtc0    $t1, C0_INX
+    nop
+    tlbwi
+    nop
+    nop
+    addi    $t1, $t1, -0x0001
+    bnezl   $t1, .L803224B8
+    nop
+    mtc0    $t0, C0_ENTRYHI
+    jr      $ra
+    nop

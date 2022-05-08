@@ -1,0 +1,39 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* s32 osEepromProbe(OSMesgQueue *mq) */
+.globl osEepromProbe
+osEepromProbe:
+    addiu   $sp, $sp, -0x0020
+    sw      $ra, 0x0014($sp)
+    sw      $a0, 0x0020($sp)
+    jal     __osSiGetAccess
+    sw      $0, 0x001C($sp)
+    lw      $a0, 0x0020($sp)
+    jal     __osEepStatus
+    addiu   $a1, $sp, 0x0018
+    sw      $v0, 0x001C($sp)
+    lw      $t6, 0x001C($sp)
+    bnez    $t6, .L803240CC
+    nop
+    lhu     $t7, 0x0018($sp)
+    andi    $t8, $t7, 0x8000
+    beqz    $t8, .L803240CC
+    nop
+    li      $t9, 0x0001
+    b       .L803240D0
+    sw      $t9, 0x001C($sp)
+.L803240CC:
+    sw      $0, 0x001C($sp)
+.L803240D0:
+    jal     __osSiRelAccess
+    nop
+    lw      $ra, 0x0014($sp)
+    lw      $v0, 0x001C($sp)
+    addiu   $sp, $sp, 0x0020
+    jr      $ra
+    nop

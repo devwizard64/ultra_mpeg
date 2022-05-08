@@ -1,0 +1,72 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+.globl osPiRawStartDma
+osPiRawStartDma:
+    addiu   $sp, $sp, -0x0028
+    sw      $ra, 0x001C($sp)
+    sw      $a0, 0x0028($sp)
+    sw      $a1, 0x002C($sp)
+    sw      $a2, 0x0030($sp)
+    sw      $a3, 0x0034($sp)
+    sw      $s1, 0x0018($sp)
+    sw      $s0, 0x0014($sp)
+    lui     $t6, %hi(0xA4600010)
+    lw      $s0, %lo(0xA4600010)($t6)
+    andi    $t7, $s0, 0x0003
+    beqz    $t7, .L803284F8
+    nop
+.L803284E4:
+    lui     $t8, %hi(0xA4600010)
+    lw      $s0, %lo(0xA4600010)($t8)
+    andi    $t9, $s0, 0x0003
+    bnez    $t9, .L803284E4
+    nop
+.L803284F8:
+    jal     osVirtualToPhysical
+    lw      $a0, 0x0030($sp)
+    lui     $t0, %hi(0xA4600000)
+    sw      $v0, %lo(0xA4600000)($t0)
+    lui     $t1, %hi(osRomBase)
+    lw      $t1, %lo(osRomBase)($t1)
+    lw      $t2, 0x002C($sp)
+    lui     $at, 0x1FFFFFFF >> 16
+    ori     $at, 0x1FFFFFFF & 0xFFFF
+    or      $t3, $t1, $t2
+    and     $t4, $t3, $at
+    lui     $t5, %hi(0xA4600004)
+    sw      $t4, %lo(0xA4600004)($t5)
+    lw      $s1, 0x0028($sp)
+    beqz    $s1, .L80328548
+    li      $at, 0x0001
+    beq     $s1, $at, .L8032855C
+    nop
+    b       .L80328570
+    nop
+.L80328548:
+    lw      $t6, 0x0034($sp)
+    lui     $t8, %hi(0xA460000C)
+    addiu   $t7, $t6, -0x0001
+    b       .L80328578
+    sw      $t7, %lo(0xA460000C)($t8)
+.L8032855C:
+    lw      $t9, 0x0034($sp)
+    lui     $t1, %hi(0xA4600008)
+    addiu   $t0, $t9, -0x0001
+    b       .L80328578
+    sw      $t0, %lo(0xA4600008)($t1)
+.L80328570:
+    b       .L8032857C
+    li      $v0, -0x0001
+.L80328578:
+    move    $v0, $0
+.L8032857C:
+    lw      $ra, 0x001C($sp)
+    lw      $s0, 0x0014($sp)
+    lw      $s1, 0x0018($sp)
+    jr      $ra
+    addiu   $sp, $sp, 0x0028

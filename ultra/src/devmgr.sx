@@ -1,0 +1,108 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+.globl __osDevMgrMain
+__osDevMgrMain:
+    addiu   $sp, $sp, -0x0038
+    sw      $a0, 0x0038($sp)
+    lw      $t6, 0x0038($sp)
+    sw      $ra, 0x001C($sp)
+    sw      $s0, 0x0018($sp)
+    sw      $0, 0x0034($sp)
+    sw      $0, 0x0028($sp)
+    sw      $t6, 0x0024($sp)
+.L803285B0:
+    lw      $t7, 0x0024($sp)
+    addiu   $a1, $sp, 0x0034
+    li      $a2, 0x0001
+    jal     osRecvMesg
+    lw      $a0, 0x0008($t7)
+    lw      $t8, 0x0034($sp)
+    li      $at, 0x000A
+    lhu     $s0, 0x0000($t8)
+    beq     $s0, $at, .L80328668
+    li      $at, 0x000B
+    beq     $s0, $at, .L803285F0
+    li      $at, 0x000C
+    beq     $s0, $at, .L8032862C
+    nop
+    b       .L80328688
+    nop
+.L803285F0:
+    lw      $t9, 0x0024($sp)
+    addiu   $a1, $sp, 0x002C
+    li      $a2, 0x0001
+    jal     osRecvMesg
+    lw      $a0, 0x0010($t9)
+    lw      $t1, 0x0024($sp)
+    lw      $t0, 0x0034($sp)
+    move    $a0, $0
+    lw      $t9, 0x0014($t1)
+    lw      $a1, 0x000C($t0)
+    lw      $a2, 0x0008($t0)
+    jalr    $t9
+    lw      $a3, 0x0010($t0)
+    b       .L80328690
+    sw      $v0, 0x0028($sp)
+.L8032862C:
+    lw      $t2, 0x0024($sp)
+    addiu   $a1, $sp, 0x002C
+    li      $a2, 0x0001
+    jal     osRecvMesg
+    lw      $a0, 0x0010($t2)
+    lw      $t4, 0x0024($sp)
+    lw      $t3, 0x0034($sp)
+    li      $a0, 0x0001
+    lw      $t9, 0x0014($t4)
+    lw      $a1, 0x000C($t3)
+    lw      $a2, 0x0008($t3)
+    jalr    $t9
+    lw      $a3, 0x0010($t3)
+    b       .L80328690
+    sw      $v0, 0x0028($sp)
+.L80328668:
+    lw      $t5, 0x0034($sp)
+    move    $a2, $0
+    lw      $a0, 0x0004($t5)
+    jal     osSendMesg
+    move    $a1, $t5
+    li      $t6, -0x0001
+    b       .L80328690
+    sw      $t6, 0x0028($sp)
+.L80328688:
+    li      $t7, -0x0001
+    sw      $t7, 0x0028($sp)
+.L80328690:
+    lw      $t8, 0x0028($sp)
+    bnez    $t8, .L803285B0
+    nop
+    lw      $t0, 0x0024($sp)
+    addiu   $a1, $sp, 0x0030
+    li      $a2, 0x0001
+    jal     osRecvMesg
+    lw      $a0, 0x000C($t0)
+    lw      $t1, 0x0034($sp)
+    move    $a2, $0
+    lw      $a0, 0x0004($t1)
+    jal     osSendMesg
+    move    $a1, $t1
+    lw      $t2, 0x0024($sp)
+    move    $a1, $0
+    move    $a2, $0
+    jal     osSendMesg
+    lw      $a0, 0x0010($t2)
+    b       .L803285B0
+    nop
+    nop
+    nop
+    nop
+    nop
+    lw      $ra, 0x001C($sp)
+    lw      $s0, 0x0018($sp)
+    addiu   $sp, $sp, 0x0038
+    jr      $ra
+    nop

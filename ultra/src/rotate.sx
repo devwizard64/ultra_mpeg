@@ -1,0 +1,135 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void guRotateF(float mf[4][4], float a, float x, float y, float z) */
+.globl guRotateF
+guRotateF:
+    addiu   $sp, $sp, -0x0038
+    lui     $at, %hi(guRotateF__80339870)
+    lwc1    $f4, %lo(guRotateF__80339870)($at)
+    sw      $s0, 0x0018($sp)
+    move    $s0, $a0
+    lui     $at, %hi(guRotateF__dtor)
+    sw      $ra, 0x001C($sp)
+    sw      $a1, 0x003C($sp)
+    sw      $a2, 0x0040($sp)
+    sw      $a3, 0x0044($sp)
+    addiu   $a2, $sp, 0x0048
+    addiu   $a1, $sp, 0x0044
+    addiu   $a0, $sp, 0x0040
+    jal     guNormalize
+    swc1    $f4, %lo(guRotateF__dtor)($at)
+    lui     $at, %hi(guRotateF__dtor)
+    lwc1    $f12, 0x003C($sp)
+    lwc1    $f6, %lo(guRotateF__dtor)($at)
+    mul.s   $f12, $f12, $f6
+    jal     sinf
+    swc1    $f12, 0x003C($sp)
+    lwc1    $f12, 0x003C($sp)
+    jal     cosf
+    swc1    $f0, 0x0034($sp)
+    lwc1    $f10, 0x0040($sp)
+    lwc1    $f4, 0x0044($sp)
+    li      $at, 0x3F800000
+    mtc1    $at, $f8
+    mul.s   $f6, $f10, $f4
+    move    $a0, $s0
+    sub.s   $f2, $f8, $f0
+    lwc1    $f8, 0x0048($sp)
+    swc1    $f0, 0x0030($sp)
+    mul.s   $f16, $f6, $f2
+    nop
+    mul.s   $f6, $f4, $f8
+    swc1    $f16, 0x002C($sp)
+    mul.s   $f18, $f6, $f2
+    nop
+    mul.s   $f4, $f8, $f10
+    swc1    $f18, 0x0028($sp)
+    mul.s   $f6, $f4, $f2
+    jal     guMtxIdentF
+    swc1    $f6, 0x0024($sp)
+    lwc1    $f8, 0x0040($sp)
+    li      $at, 0x3F800000
+    mtc1    $at, $f10
+    mul.s   $f0, $f8, $f8
+    lwc1    $f12, 0x0030($sp)
+    lwc1    $f14, 0x0034($sp)
+    lwc1    $f16, 0x002C($sp)
+    lwc1    $f18, 0x0028($sp)
+    sub.s   $f4, $f10, $f0
+    mul.s   $f6, $f4, $f12
+    add.s   $f8, $f6, $f0
+    swc1    $f8, 0x0000($s0)
+    lwc1    $f10, 0x0040($sp)
+    mul.s   $f4, $f10, $f14
+    sub.s   $f6, $f18, $f4
+    swc1    $f6, 0x0024($s0)
+    lwc1    $f8, 0x0040($sp)
+    mul.s   $f10, $f8, $f14
+    mtc1    $at, $f8
+    add.s   $f4, $f10, $f18
+    swc1    $f4, 0x0018($s0)
+    lwc1    $f6, 0x0044($sp)
+    mul.s   $f2, $f6, $f6
+    sub.s   $f10, $f8, $f2
+    mul.s   $f4, $f10, $f12
+    add.s   $f6, $f4, $f2
+    swc1    $f6, 0x0014($s0)
+    lwc1    $f8, 0x0044($sp)
+    lwc1    $f4, 0x0024($sp)
+    mul.s   $f10, $f8, $f14
+    add.s   $f6, $f10, $f4
+    swc1    $f6, 0x0020($s0)
+    lwc1    $f10, 0x0044($sp)
+    lwc1    $f8, 0x0024($sp)
+    mul.s   $f4, $f10, $f14
+    sub.s   $f6, $f8, $f4
+    mtc1    $at, $f8
+    swc1    $f6, 0x0008($s0)
+    lwc1    $f10, 0x0048($sp)
+    mul.s   $f0, $f10, $f10
+    sub.s   $f4, $f8, $f0
+    mul.s   $f6, $f4, $f12
+    add.s   $f10, $f6, $f0
+    swc1    $f10, 0x0028($s0)
+    lwc1    $f8, 0x0048($sp)
+    mul.s   $f4, $f8, $f14
+    sub.s   $f6, $f16, $f4
+    swc1    $f6, 0x0010($s0)
+    lwc1    $f10, 0x0048($sp)
+    mul.s   $f8, $f10, $f14
+    add.s   $f4, $f8, $f16
+    swc1    $f4, 0x0004($s0)
+    lw      $ra, 0x001C($sp)
+    lw      $s0, 0x0018($sp)
+    addiu   $sp, $sp, 0x0038
+    jr      $ra
+    nop
+
+/* void guRotate(Mtx *m, float a, float x, float y, float z) */
+.globl guRotate
+guRotate:
+    mtc1    $a1, $f12
+    mtc1    $a2, $f14
+    mtc1    $a3, $f16
+    addiu   $sp, $sp, -0x0060
+    lwc1    $f4, 0x0070($sp)
+    sw      $ra, 0x001C($sp)
+    sw      $a0, 0x0060($sp)
+    mfc1    $a1, $f12
+    mfc1    $a2, $f14
+    mfc1    $a3, $f16
+    addiu   $a0, $sp, 0x0020
+    jal     guRotateF
+    swc1    $f4, 0x0010($sp)
+    addiu   $a0, $sp, 0x0020
+    jal     guMtxF2L
+    lw      $a1, 0x0060($sp)
+    lw      $ra, 0x001C($sp)
+    addiu   $sp, $sp, 0x0060
+    jr      $ra
+    nop

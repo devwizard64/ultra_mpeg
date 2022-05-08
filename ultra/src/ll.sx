@@ -1,0 +1,225 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+.set gp=64
+
+.align 4
+
+.globl __ull_rshift
+__ull_rshift:
+    sw      $a0, 0x0000($sp)
+    sw      $a1, 0x0004($sp)
+    sw      $a2, 0x0008($sp)
+    sw      $a3, 0x000C($sp)
+    ld      $t7, 0x0008($sp)
+    ld      $t6, 0x0000($sp)
+    dsrlv   $v0, $t6, $t7
+    dsll32  $v1, $v0, 0
+    dsra32  $v1, $v1, 0
+    jr      $ra
+    dsra32  $v0, $v0, 0
+
+.globl __ull_rem
+__ull_rem:
+    sw      $a0, 0x0000($sp)
+    sw      $a1, 0x0004($sp)
+    sw      $a2, 0x0008($sp)
+    sw      $a3, 0x000C($sp)
+    ld      $t7, 0x0008($sp)
+    ld      $t6, 0x0000($sp)
+    ddivu   $0, $t6, $t7
+    bnez    $t7, .L80324144
+    nop
+    break   7
+.L80324144:
+    mfhi    $v0
+    dsll32  $v1, $v0, 0
+    dsra32  $v1, $v1, 0
+    jr      $ra
+    dsra32  $v0, $v0, 0
+
+.globl __ull_div
+__ull_div:
+    sw      $a0, 0x0000($sp)
+    sw      $a1, 0x0004($sp)
+    sw      $a2, 0x0008($sp)
+    sw      $a3, 0x000C($sp)
+    ld      $t7, 0x0008($sp)
+    ld      $t6, 0x0000($sp)
+    ddivu   $0, $t6, $t7
+    bnez    $t7, .L80324180
+    nop
+    break   7
+.L80324180:
+    mflo    $v0
+    dsll32  $v1, $v0, 0
+    dsra32  $v1, $v1, 0
+    jr      $ra
+    dsra32  $v0, $v0, 0
+
+.globl __ll_lshift
+__ll_lshift:
+    sw      $a0, 0x0000($sp)
+    sw      $a1, 0x0004($sp)
+    sw      $a2, 0x0008($sp)
+    sw      $a3, 0x000C($sp)
+    ld      $t7, 0x0008($sp)
+    ld      $t6, 0x0000($sp)
+    dsllv   $v0, $t6, $t7
+    dsll32  $v1, $v0, 0
+    dsra32  $v1, $v1, 0
+    jr      $ra
+    dsra32  $v0, $v0, 0
+
+.globl __ll_rem
+__ll_rem:
+    sw      $a0, 0x0000($sp)
+    sw      $a1, 0x0004($sp)
+    sw      $a2, 0x0008($sp)
+    sw      $a3, 0x000C($sp)
+    ld      $t7, 0x0008($sp)
+    ld      $t6, 0x0000($sp)
+    ddivu   $0, $t6, $t7
+    bnez    $t7, .L803241E8
+    nop
+    break   7
+.L803241E8:
+    mfhi    $v0
+    dsll32  $v1, $v0, 0
+    dsra32  $v1, $v1, 0
+    jr      $ra
+    dsra32  $v0, $v0, 0
+
+.globl __ll_div
+__ll_div:
+    sw      $a0, 0x0000($sp)
+    sw      $a1, 0x0004($sp)
+    sw      $a2, 0x0008($sp)
+    sw      $a3, 0x000C($sp)
+    ld      $t7, 0x0008($sp)
+    ld      $t6, 0x0000($sp)
+    ddiv    $0, $t6, $t7
+    nop
+    bnez    $t7, .L80324228
+    nop
+    break   7
+.L80324228:
+    daddiu  $at, $0, -0x0001
+    bne     $t7, $at, .L80324244
+    daddiu  $at, $0, 0x0001
+    dsll32  $at, $at, 31
+    bne     $t6, $at, .L80324244
+    nop
+    break   6
+.L80324244:
+    mflo    $v0
+    dsll32  $v1, $v0, 0
+    dsra32  $v1, $v1, 0
+    jr      $ra
+    dsra32  $v0, $v0, 0
+
+.globl __ll_mul
+__ll_mul:
+    sw      $a0, 0x0000($sp)
+    sw      $a1, 0x0004($sp)
+    sw      $a2, 0x0008($sp)
+    sw      $a3, 0x000C($sp)
+    ld      $t7, 0x0008($sp)
+    ld      $t6, 0x0000($sp)
+    dmultu  $t6, $t7
+    mflo    $v0
+    dsll32  $v1, $v0, 0
+    dsra32  $v1, $v1, 0
+    jr      $ra
+    dsra32  $v0, $v0, 0
+
+.globl __ull_divremi
+__ull_divremi:
+    lh      $t7, 0x0012($sp)
+    sw      $a2, 0x0008($sp)
+    sw      $a3, 0x000C($sp)
+    ld      $t6, 0x0008($sp)
+    move    $t8, $t7
+    move    $t9, $t8
+    ddivu   $0, $t6, $t9
+    bnez    $t9, .L803242B0
+    nop
+    break   7
+.L803242B0:
+    mflo    $t0
+    sd      $t0, 0x0000($a0)
+    lh      $t2, 0x0012($sp)
+    ld      $t1, 0x0008($sp)
+    move    $t3, $t2
+    move    $t4, $t3
+    ddivu   $0, $t1, $t4
+    bnez    $t4, .L803242D8
+    nop
+    break   7
+.L803242D8:
+    mfhi    $t5
+    sd      $t5, 0x0000($a1)
+    jr      $ra
+    nop
+
+.globl __ll_mod
+__ll_mod:
+    addiu   $sp, $sp, -0x0008
+    sw      $a0, 0x0008($sp)
+    sw      $a1, 0x000C($sp)
+    sw      $a2, 0x0010($sp)
+    sw      $a3, 0x0014($sp)
+    ld      $t7, 0x0010($sp)
+    ld      $t6, 0x0008($sp)
+    ddiv    $0, $t6, $t7
+    nop
+    bnez    $t7, .L80324318
+    nop
+    break   7
+.L80324318:
+    daddiu  $at, $0, -0x0001
+    bne     $t7, $at, .L80324334
+    daddiu  $at, $0, 0x0001
+    dsll32  $at, $at, 31
+    bne     $t6, $at, .L80324334
+    nop
+    break   6
+.L80324334:
+    mfhi    $t8
+    sd      $t8, 0x0000($sp)
+    bgez    $t8, .L8032434C
+    nop
+    bgtz    $t7, .L80324364
+    nop
+.L8032434C:
+    ld      $t9, 0x0000($sp)
+    blez    $t9, .L80324374
+    nop
+    ld      $t0, 0x0010($sp)
+    bgez    $t0, .L80324374
+    nop
+.L80324364:
+    ld      $t1, 0x0000($sp)
+    ld      $t2, 0x0010($sp)
+    daddu   $t3, $t1, $t2
+    sd      $t3, 0x0000($sp)
+.L80324374:
+    lw      $v0, 0x0000($sp)
+    lw      $v1, 0x0004($sp)
+    jr      $ra
+    addiu   $sp, $sp, 0x0008
+
+.globl __ll_rshift
+__ll_rshift:
+    sw      $a0, 0x0000($sp)
+    sw      $a1, 0x0004($sp)
+    sw      $a2, 0x0008($sp)
+    sw      $a3, 0x000C($sp)
+    ld      $t7, 0x0008($sp)
+    ld      $t6, 0x0000($sp)
+    dsrav   $v0, $t6, $t7
+    dsll32  $v1, $v0, 0
+    dsra32  $v1, $v1, 0
+    jr      $ra
+    dsra32  $v0, $v0, 0

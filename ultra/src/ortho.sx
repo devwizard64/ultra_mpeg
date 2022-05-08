@@ -1,0 +1,145 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void guOrthoF(
+    float mf[4][4],
+    float l,
+    float r,
+    float b,
+    float t,
+    float n,
+    float f,
+    float scale
+) */
+.globl guOrthoF
+guOrthoF:
+    addiu   $sp, $sp, -0x0018
+    sw      $ra, 0x0014($sp)
+    sw      $a1, 0x001C($sp)
+    sw      $a2, 0x0020($sp)
+    sw      $a3, 0x0024($sp)
+    jal     guMtxIdentF
+    sw      $a0, 0x0018($sp)
+    lwc1    $f4, 0x0020($sp)
+    lwc1    $f6, 0x001C($sp)
+    li      $at, 0x40000000
+    mtc1    $at, $f8
+    sub.s   $f0, $f4, $f6
+    lw      $v0, 0x0018($sp)
+    lwc1    $f14, 0x0028($sp)
+    lwc1    $f16, 0x0030($sp)
+    div.s   $f10, $f8, $f0
+    lwc1    $f18, 0x002C($sp)
+    mtc1    $at, $f6
+    li      $at, 0xC0000000
+    sub.s   $f12, $f16, $f18
+    move    $v1, $0
+    li      $a0, 0x0004
+    swc1    $f10, 0x0000($v0)
+    lwc1    $f4, 0x0024($sp)
+    mtc1    $at, $f10
+    li      $at, 0x3F800000
+    sub.s   $f2, $f14, $f4
+    div.s   $f4, $f10, $f12
+    div.s   $f8, $f6, $f2
+    swc1    $f4, 0x0028($v0)
+    swc1    $f8, 0x0014($v0)
+    lwc1    $f8, 0x001C($sp)
+    lwc1    $f6, 0x0020($sp)
+    add.s   $f10, $f6, $f8
+    neg.s   $f4, $f10
+    div.s   $f6, $f4, $f0
+    swc1    $f6, 0x0030($v0)
+    lwc1    $f8, 0x0024($sp)
+    add.s   $f10, $f14, $f8
+    add.s   $f8, $f16, $f18
+    neg.s   $f4, $f10
+    neg.s   $f10, $f8
+    div.s   $f6, $f4, $f2
+    div.s   $f4, $f10, $f12
+    swc1    $f6, 0x0034($v0)
+    mtc1    $at, $f6
+    nop
+    swc1    $f6, 0x003C($v0)
+    swc1    $f4, 0x0038($v0)
+    lwc1    $f0, 0x0034($sp)
+    lwc1    $f8, 0x0000($v0)
+    addiu   $v1, $v1, 0x0001
+    lwc1    $f18, 0x0004($v0)
+    mul.s   $f12, $f8, $f0
+    lwc1    $f14, 0x0008($v0)
+    beq     $v1, $a0, .L80324D40
+    lwc1    $f16, 0x000C($v0)
+.L80324D04:
+    mul.s   $f10, $f18, $f0
+    lwc1    $f8, 0x0010($v0)
+    lwc1    $f18, 0x0014($v0)
+    mul.s   $f6, $f14, $f0
+    lwc1    $f14, 0x0018($v0)
+    addiu   $v1, $v1, 0x0001
+    mul.s   $f4, $f16, $f0
+    lwc1    $f16, 0x001C($v0)
+    swc1    $f12, 0x0000($v0)
+    mul.s   $f12, $f8, $f0
+    swc1    $f10, 0x0004($v0)
+    swc1    $f6, 0x0008($v0)
+    addiu   $v0, $v0, 0x0010
+    bne     $v1, $a0, .L80324D04
+    swc1    $f4, -0x0004($v0)
+.L80324D40:
+    mul.s   $f10, $f18, $f0
+    addiu   $v0, $v0, 0x0010
+    swc1    $f12, -0x0010($v0)
+    mul.s   $f6, $f14, $f0
+    nop
+    mul.s   $f4, $f16, $f0
+    swc1    $f10, -0x000C($v0)
+    swc1    $f6, -0x0008($v0)
+    swc1    $f4, -0x0004($v0)
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0018
+    jr      $ra
+    nop
+
+/* void guOrtho(
+    Mtx *m,
+    float l,
+    float r,
+    float b,
+    float t,
+    float n,
+    float f,
+    float scale
+) */
+.globl guOrtho
+guOrtho:
+    addiu   $sp, $sp, -0x0068
+    mtc1    $a1, $f12
+    mtc1    $a2, $f14
+    mtc1    $a3, $f16
+    lwc1    $f4, 0x0078($sp)
+    lwc1    $f6, 0x007C($sp)
+    lwc1    $f8, 0x0080($sp)
+    lwc1    $f10, 0x0084($sp)
+    sw      $ra, 0x0024($sp)
+    sw      $a0, 0x0068($sp)
+    mfc1    $a1, $f12
+    mfc1    $a2, $f14
+    mfc1    $a3, $f16
+    addiu   $a0, $sp, 0x0028
+    swc1    $f4, 0x0010($sp)
+    swc1    $f6, 0x0014($sp)
+    swc1    $f8, 0x0018($sp)
+    jal     guOrthoF
+    swc1    $f10, 0x001C($sp)
+    addiu   $a0, $sp, 0x0028
+    jal     guMtxF2L
+    lw      $a1, 0x0068($sp)
+    lw      $ra, 0x0024($sp)
+    addiu   $sp, $sp, 0x0068
+    jr      $ra
+    nop

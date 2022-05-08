@@ -1,0 +1,33 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* s32 osPiRawReadIo(u32 devAddr, u32 *data) */
+.globl osPiRawReadIo
+osPiRawReadIo:
+    lui     $t6, %hi(0xA4600010)
+    lw      $a2, %lo(0xA4600010)($t6)
+    addiu   $sp, $sp, -0x0008
+    andi    $t7, $a2, 0x0003
+    beqz    $t7, .L8032886C
+    nop
+.L80328858:
+    lui     $t8, %hi(0xA4600010)
+    lw      $a2, %lo(0xA4600010)($t8)
+    andi    $t9, $a2, 0x0003
+    bnez    $t9, .L80328858
+    nop
+.L8032886C:
+    lui     $t0, %hi(osRomBase)
+    lw      $t0, %lo(osRomBase)($t0)
+    li      $at, 0xA0000000
+    move    $v0, $0
+    or      $t1, $t0, $a0
+    or      $t2, $t1, $at
+    lw      $t3, 0x0000($t2)
+    addiu   $sp, $sp, 0x0008
+    jr      $ra
+    sw      $t3, 0x0000($a1)

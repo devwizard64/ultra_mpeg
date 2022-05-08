@@ -1,0 +1,21 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void osCreateMesgQueue(OSMesgQueue *mq, OSMesg *msg, s32 count) */
+.globl osCreateMesgQueue
+osCreateMesgQueue:
+    lui     $t6, %hi(__osThreadTail)
+    lui     $t7, %hi(__osThreadTail)
+    addiu   $t6, %lo(__osThreadTail)
+    addiu   $t7, %lo(__osThreadTail)
+    sw      $t6, 0x0000($a0)
+    sw      $t7, 0x0004($a0)
+    sw      $0, 0x0008($a0)
+    sw      $0, 0x000C($a0)
+    sw      $a2, 0x0010($a0)
+    jr      $ra
+    sw      $a1, 0x0014($a0)

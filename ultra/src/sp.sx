@@ -1,0 +1,22 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+.globl __osSpDeviceBusy
+__osSpDeviceBusy:
+    lui     $t6, %hi(0xA4040010)
+    lw      $a0, %lo(0xA4040010)($t6)
+    addiu   $sp, $sp, -0x0008
+    andi    $t7, $a0, 0x001C
+    beqz    $t7, .L80328030
+    nop
+    b       .L80328034
+    li      $v0, 0x0001
+.L80328030:
+    move    $v0, $0
+.L80328034:
+    jr      $ra
+    addiu   $sp, $sp, 0x0008

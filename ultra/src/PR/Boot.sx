@@ -1,0 +1,834 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+IPL3:
+    mtc0    $0, C0_CAUSE
+    mtc0    $0, C0_COUNT
+    mtc0    $0, C0_COMPARE
+    lui     $t0, %hi(0xA4700000)
+    addiu   $t0, %lo(0xA4700000)
+    lw      $t1, 0x000C($t0)
+    bnez    $t1, nmi
+    nop
+    addiu   $sp, $sp, -0x0018
+    sw      $s3, 0x0000($sp)
+    sw      $s4, 0x0004($sp)
+    sw      $s5, 0x0008($sp)
+    sw      $s6, 0x000C($sp)
+    sw      $s7, 0x0010($sp)
+    lui     $t0, %hi(0xA4700000)
+    addiu   $t0, %lo(0xA4700000)
+    li      $t2, 0xA3F80000
+    li      $t3, 0xA3F00000
+    lui     $t4, %hi(0xA4300000)
+    addiu   $t4, %lo(0xA4300000)
+    ori     $t1, $0, 0x0040
+    sw      $t1, 0x0004($t0)
+    li      $s1, 0x1F40
+
+wait_rac:
+    nop
+    addi    $s1, $s1, -0x0001
+    bnez    $s1, wait_rac
+    nop
+    sw      $0, 0x0008($t0)
+    ori     $t1, $0, 0x0014
+    sw      $t1, 0x000C($t0)
+    sw      $0, 0x0000($t0)
+    li      $s1, 0x0004
+
+wait_rac1:
+    nop
+    addi    $s1, $s1, -0x0001
+    bnez    $s1, wait_rac1
+    nop
+    ori     $t1, $0, 0x000E
+    sw      $t1, 0x0000($t0)
+    li      $s1, 0x0020
+
+wait_rdram:
+    addi    $s1, $s1, -0x0001
+    bnez    $s1, wait_rdram
+    ori     $t1, $0, 0x010F
+    sw      $t1, 0x0000($t4)
+    lui     $t1, 0x18082838 >> 16
+    ori     $t1, 0x18082838 & 0xFFFF
+    sw      $t1, 0x0008($t2)
+    sw      $0, 0x0014($t2)
+    li      $t1, 0x80000000
+    sw      $t1, 0x0004($t2)
+    move    $t5, $0
+    move    $t6, $0
+    li      $t7, 0xA3F00000
+    move    $t8, $0
+    li      $t9, 0xA3F00000
+    li      $s6, 0xA0000000
+    move    $s7, $0
+    li      $a2, 0xA3F00000
+    li      $a3, 0xA0000000
+    move    $s2, $0
+    li      $s4, 0xA0000000
+    addiu   $sp, $sp, -0x0048
+    move    $s8, $sp
+    lui     $s0, %hi(0xA4300004)
+    lw      $s0, %lo(0xA4300004)($s0)
+    lui     $s1, %hi(0x01010101)
+    addiu   $s1, %lo(0x01010101)
+    bne     $s0, $s1, rcp2
+    nop
+    li      $s0, 0x0200
+    ori     $s1, $t3, 0x4000
+    b       loop1
+    nop
+
+rcp2:
+    li      $s0, 0x0400
+    ori     $s1, $t3, 0x8000
+
+loop1:
+    sw      $t6, 0x0004($s1)
+    addiu   $s5, $t7, 0x000C
+    jal     InitCCValue
+    nop
+    beqz    $v0, done_loop1
+    nop
+    sw      $v0, 0x0000($sp)
+    li      $t1, 0x2000
+    sw      $t1, 0x0000($t4)
+    lw      $t3, 0x0000($t7)
+    li      $t0, 0xF0FF0000
+    and     $t3, $t3, $t0
+    sw      $t3, 0x0004($sp)
+    addi    $sp, $sp, 0x0008
+    li      $t1, 0x1000
+    sw      $t1, 0x0000($t4)
+    li      $t0, 0xB0190000
+    bne     $t3, $t0, SM
+    nop
+    li      $t0, 0x08000000
+    add     $t8, $t8, $t0
+    add     $t9, $t9, $s0
+    add     $t9, $t9, $s0
+    li      $t0, 0x00200000
+    add     $s6, $s6, $t0
+    add     $s4, $s4, $t0
+    sll     $s2, $s2, 1
+    addi    $s2, $s2, 0x0001
+    b       LM
+    nop
+
+SM:
+    li      $t0, 0x00100000
+    add     $s4, $s4, $t0
+
+LM:
+    li      $t0, 0x2000
+    sw      $t0, 0x0000($t4)
+    lw      $t1, 0x0024($t7)
+    lw      $k0, 0x0000($t7)
+    li      $t0, 0x1000
+    sw      $t0, 0x0000($t4)
+    andi    $t1, $t1, 0xFFFF
+    li      $t0, 0x0500
+    bne     $t1, $t0, toshiba
+    nop
+    li      $k1, 0x01000000
+    and     $k0, $k0, $k1
+    bnez    $k0, toshiba
+    nop
+    lui     $t0, 0x101C0A04 >> 16
+    ori     $t0, 0x101C0A04 & 0xFFFF
+    sw      $t0, 0x0018($t7)
+    b       done_manufacture
+
+toshiba:
+    lui     $t0, 0x080C1204 >> 16
+    ori     $t0, 0x080C1204 & 0xFFFF
+    sw      $t0, 0x0018($t7)
+
+done_manufacture:
+    li      $t0, 0x08000000
+    add     $t6, $t6, $t0
+    add     $t7, $t7, $s0
+    add     $t7, $t7, $s0
+    addiu   $t5, $t5, 0x0001
+    sltiu   $t0, $t5, 0x0008
+    bnez    $t0, loop1
+    nop
+
+done_loop1:
+    li      $t0, 0xC4000000
+    sw      $t0, 0x000C($t2)
+    li      $t0, 0x80000000
+    sw      $t0, 0x0004($t2)
+    move    $sp, $s8
+    move    $v1, $0
+
+loop2:
+    lw      $t1, 0x0004($sp)
+    li      $t0, 0xB0090000
+    bne     $t1, $t0, HM
+    nop
+    sw      $t8, 0x0004($s1)
+    addiu   $s5, $t9, 0x000C
+    lw      $a0, 0x0000($sp)
+    addi    $sp, $sp, 0x0008
+    li      $a1, 0x0001
+    jal     WriteCC
+    nop
+    lw      $t0, 0x0000($s6)
+    li      $t0, 0x00080000
+    add     $t0, $t0, $s6
+    lw      $t1, 0x0000($t0)
+    lw      $t0, 0x0000($s6)
+    li      $t0, 0x00080000
+    add     $t0, $t0, $s6
+    lw      $t1, 0x0000($t0)
+    li      $t0, 0x04000000
+    add     $t6, $t6, $t0
+    add     $t9, $t9, $s0
+    li      $t0, 0x00100000
+    add     $s6, $s6, $t0
+    b       done_loop2
+
+HM:
+    sw      $s7, 0x0004($s1)
+    addiu   $s5, $a2, 0x000C
+    lw      $a0, 0x0000($sp)
+    addi    $sp, $sp, 0x0008
+    li      $a1, 0x0001
+    jal     WriteCC
+    nop
+    lw      $t0, 0x0000($a3)
+    li      $t0, 0x00080000
+    add     $t0, $t0, $a3
+    lw      $t1, 0x0000($t0)
+    li      $t0, 0x00100000
+    add     $t0, $t0, $a3
+    lw      $t1, 0x0000($t0)
+    li      $t0, 0x00180000
+    add     $t0, $t0, $a3
+    lw      $t1, 0x0000($t0)
+    lw      $t0, 0x0000($a3)
+    li      $t0, 0x00080000
+    add     $t0, $t0, $a3
+    lw      $t1, 0x0000($t0)
+    li      $t0, 0x00100000
+    add     $t0, $t0, $a3
+    lw      $t1, 0x0000($t0)
+    li      $t0, 0x00180000
+    add     $t0, $t0, $a3
+    lw      $t1, 0x0000($t0)
+    li      $t0, 0x08000000
+    add     $s7, $s7, $t0
+    add     $a2, $a2, $s0
+    add     $a2, $a2, $s0
+    li      $t0, 0x00200000
+    add     $a3, $a3, $t0
+
+done_loop2:
+    addiu   $v1, $v1, 0x0001
+    slt     $t0, $v1, $t5
+    bnez    $t0, loop2
+    nop
+    lui     $t2, %hi(0xA4700010)
+    sll     $s2, $s2, 19
+    lui     $t1, 0x00063634 >> 16
+    ori     $t1, 0x00063634 & 0xFFFF
+    or      $t1, $t1, $s2
+    sw      $t1, %lo(0xA4700010)($t2)
+    lw      $t1, %lo(0xA4700010)($t2)
+    lui     $t0, 0xA0000300 >> 16
+    ori     $t0, 0xA0000300 & 0xFFFF
+    lui     $t1, 0x0FFFFFFF >> 16
+    ori     $t1, 0x0FFFFFFF & 0xFFFF
+    and     $s6, $s6, $t1
+    sw      $s6, 0x0018($t0)
+    move    $sp, $s8
+    addiu   $sp, $sp, 0x0048
+    lw      $s3, 0x0000($sp)
+    lw      $s4, 0x0004($sp)
+    lw      $s5, 0x0008($sp)
+    lw      $s6, 0x000C($sp)
+    lw      $s7, 0x0010($sp)
+    addiu   $sp, $sp, 0x0018
+    lui     $t0, %hi(0x80000000)
+    addiu   $t0, %lo(0x80000000)
+    addiu   $t1, $t0, 0x4000
+    addiu   $t1, $t1, -0x0020
+    mtc0    $0, C0_TAGLO
+    mtc0    $0, C0_TAGHI
+
+init_icache:
+    cache   0x08, 0x0000($t0)
+    sltu    $at, $t0, $t1
+    bnez    $at, init_icache
+    addiu   $t0, $t0, 0x0020
+    lui     $t0, %hi(0x80000000)
+    addiu   $t0, %lo(0x80000000)
+    addiu   $t1, $t0, 0x2000
+    addiu   $t1, $t1, -0x0010
+
+init_dcache:
+    cache   0x09, 0x0000($t0)
+    sltu    $at, $t0, $t1
+    bnez    $at, init_dcache
+    addiu   $t0, $t0, 0x0010
+    b       load_ipl3
+    nop
+
+nmi:
+    lui     $t0, %hi(0x80000000)
+    addiu   $t0, %lo(0x80000000)
+    addiu   $t1, $t0, 0x4000
+    addiu   $t1, $t1, -0x0020
+    mtc0    $0, C0_TAGLO
+    mtc0    $0, C0_TAGHI
+
+ninit_icache:
+    cache   0x08, 0x0000($t0)
+    sltu    $at, $t0, $t1
+    bnez    $at, ninit_icache
+    addiu   $t0, $t0, 0x0020
+    lui     $t0, %hi(0x80000000)
+    addiu   $t0, %lo(0x80000000)
+    addiu   $t1, $t0, 0x2000
+    addiu   $t1, $t1, -0x0010
+
+ninit_dcache:
+    cache   0x01, 0x0000($t0)
+    sltu    $at, $t0, $t1
+    bnez    $at, ninit_dcache
+    addiu   $t0, $t0, 0x0010
+
+load_ipl3:
+    lui     $t2, %hi(0xA4000000)
+    addiu   $t2, %lo(0xA4000000)
+    li      $t3, 0xFFF00000
+    lui     $t1, %hi(0x000FFFFF)
+    and     $t2, $t2, $t3
+    lui     $t0, %hi(0xA0000000+block17s)
+    addiu   $t1, %lo(0x000FFFFF)
+    lui     $t3, %hi(0xA0000000+pifipl3e)
+    addiu   $t0, %lo(0xA0000000+block17s)
+    addiu   $t3, %lo(0xA0000000+pifipl3e)
+    and     $t0, $t0, $t1
+    and     $t3, $t3, $t1
+    lui     $t1, %hi(0xA0000000)
+    or      $t0, $t0, $t2
+    or      $t3, $t3, $t2
+    addiu   $t1, %lo(0xA0000000)
+
+send2:
+    lw      $t5, 0x0000($t0)
+    addiu   $t0, $t0, 0x0004
+    sltu    $at, $t0, $t3
+    addiu   $t1, $t1, 0x0004
+    bnez    $at, send2
+    sw      $t5, -0x0004($t1)
+    lui     $t4, %hi(0x80000000)
+    addiu   $t4, %lo(0x80000000)
+    jr      $t4
+    nop
+
+block17s:
+    li      $t3, 0xB0000000
+
+cart:
+    lw      $t1, 0x0008($t3)
+    lui     $t2, 0x1FFFFFFF >> 16
+    ori     $t2, 0x1FFFFFFF & 0xFFFF
+    lui     $at, %hi(0xA4600000)
+    and     $t1, $t1, $t2
+    sw      $t1, %lo(0xA4600000)($at)
+    li      $t0, 0xA4600000
+
+waitread.L:
+    lw      $t0, 0x0010($t0)
+    andi    $t0, $t0, 0x0002
+    bnezl   $t0, waitread.L
+    li      $t0, 0xA4600000
+    li      $t0, 0x1000
+    add     $t0, $t0, $t3
+    and     $t0, $t0, $t2
+    lui     $at, %hi(0xA4600004)
+    sw      $t0, %lo(0xA4600004)($at)
+    lui     $t2, %hi(0x000FFFFF)
+    addiu   $t2, %lo(0x000FFFFF)
+    lui     $at, %hi(0xA460000C)
+    sw      $t2, %lo(0xA460000C)($at)
+
+waitdma:
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    lui     $t3, %hi(0xA4600010)
+    lw      $t3, %lo(0xA4600010)($t3)
+    andi    $t3, $t3, 0x0001
+    bnez    $t3, waitdma
+    nop
+    lui     $t3, %hi(0xB0000008)
+    lw      $a0, %lo(0xB0000008)($t3)
+    move    $a1, $s6
+    lui     $at, 0x5D588B65 >> 16
+    ori     $at, 0x5D588B65 & 0xFFFF
+    multu   $a1, $at
+    addiu   $sp, $sp, -0x0020
+    sw      $ra, 0x001C($sp)
+    sw      $s0, 0x0014($sp)
+    li      $ra, 0x00100000
+    move    $v1, $0
+    move    $t0, $0
+    move    $t1, $a0
+    li      $t5, 0x0020
+    mflo    $v0
+    addiu   $v0, $v0, 0x0001
+    move    $a3, $v0
+    move    $t2, $v0
+    move    $t3, $v0
+    move    $s0, $v0
+    move    $a2, $v0
+    move    $t4, $v0
+.L040005F0:
+    lw      $v0, 0x0000($t1)
+    addu    $v1, $a3, $v0
+    sltu    $at, $v1, $a3
+    beqz    $at, .L04000608
+    move    $a1, $v1
+    addiu   $t2, $t2, 0x0001
+.L04000608:
+    andi    $v1, $v0, 0x001F
+    subu    $t7, $t5, $v1
+    srlv    $t8, $v0, $t7
+    sllv    $t6, $v0, $v1
+    or      $a0, $t6, $t8
+    sltu    $at, $a2, $v0
+    move    $a3, $a1
+    xor     $t3, $t3, $v0
+    beqz    $at, .L0400063C
+    addu    $s0, $s0, $a0
+    xor     $t9, $a3, $v0
+    b       .L04000640
+    xor     $a2, $t9, $a2
+.L0400063C:
+    xor     $a2, $a2, $a0
+.L04000640:
+    addiu   $t0, $t0, 0x0004
+    xor     $t7, $v0, $s0
+    addiu   $t1, $t1, 0x0004
+    bne     $t0, $ra, .L040005F0
+    addu    $t4, $t7, $t4
+    xor     $t6, $a3, $t2
+    xor     $a3, $t6, $t3
+    xor     $t8, $s0, $a2
+    xor     $s0, $t8, $t4
+    lui     $t3, %hi(0xB0000014)
+    lw      $t0, %lo(0xB0000010)($t3)
+    bne     $a3, $t0, .L04000688
+    nop
+    lw      $t0, %lo(0xB0000014)($t3)
+    bne     $s0, $t0, .L04000688
+    nop
+    bal     .L04000690
+    nop
+.L04000688:
+    bal     .L04000688
+    nop
+.L04000690:
+    lui     $t1, %hi(0xA4080000)
+    lw      $t1, %lo(0xA4080000)($t1)
+    lw      $s0, 0x0014($sp)
+    lw      $ra, 0x001C($sp)
+    beqz    $t1, skip
+    addiu   $sp, $sp, 0x0020
+    li      $t2, 0x0041
+    lui     $at, %hi(0xA4040010)
+    sw      $t2, %lo(0xA4040010)($at)
+    lui     $at, %hi(0xA4080000)
+    sw      $0, %lo(0xA4080000)($at)
+
+skip:
+    lui     $t3, 0x00AAAAAE >> 16
+    ori     $t3, 0x00AAAAAE & 0xFFFF
+    lui     $at, %hi(0xA4040010)
+    sw      $t3, %lo(0xA4040010)($at)
+    lui     $at, %hi(0xA430000C)
+    li      $t0, 0x0555
+    sw      $t0, %lo(0xA430000C)($at)
+    lui     $at, %hi(0xA4800018)
+    sw      $0, %lo(0xA4800018)($at)
+    lui     $at, %hi(0xA450000C)
+    sw      $0, %lo(0xA450000C)($at)
+    lui     $at, %hi(0xA4300000)
+    li      $t1, 0x0800
+    sw      $t1, %lo(0xA4300000)($at)
+    li      $t1, 0x0002
+    lui     $at, %hi(0xA4600010)
+    lui     $t0, 0xA0000300 >> 16
+    ori     $t0, 0xA0000300 & 0xFFFF
+    sw      $t1, %lo(0xA4600010)($at)
+    sw      $s7, 0x0014($t0)
+    sw      $s5, 0x000C($t0)
+    sw      $s3, 0x0004($t0)
+    beqz    $s3, rom
+    sw      $s4, 0x0000($t0)
+    lui     $t1, %hi(0xA6000000)
+    b       .L04000730
+    addiu   $t1, %lo(0xA6000000)
+
+rom:
+    lui     $t1, %hi(0xB0000000)
+    addiu   $t1, %lo(0xB0000000)
+.L04000730:
+    sw      $t1, 0x0008($t0)
+    lui     $t0, %hi(0xA4000000)
+    addiu   $t0, %lo(0xA4000000)
+    addi    $t1, $t0, 0x1000
+
+del_dmem:
+    addiu   $t0, $t0, 0x0004
+    bne     $t0, $t1, del_dmem
+    sw      $0, -0x0004($t0)
+    lui     $t0, %hi(0xA4001000)
+    addiu   $t0, %lo(0xA4001000)
+    addi    $t1, $t0, 0x1000
+
+del_imem:
+    addiu   $t0, $t0, 0x0004
+    bne     $t0, $t1, del_imem
+    sw      $0, -0x0004($t0)
+    li      $t3, 0xB0000000
+
+game:
+    lw      $t1, 0x0008($t3)
+    jr      $t1
+    nop
+
+pifipl3e:
+    nop
+
+InitCCValue:
+    addiu   $sp, $sp, -0x00A0
+    sw      $s0, 0x0040($sp)
+    sw      $s1, 0x0044($sp)
+    move    $s1, $0
+    move    $s0, $0
+    sw      $v0, 0x0000($sp)
+    sw      $v1, 0x0004($sp)
+    sw      $a0, 0x0008($sp)
+    sw      $a1, 0x000C($sp)
+    sw      $a2, 0x0010($sp)
+    sw      $a3, 0x0014($sp)
+    sw      $t0, 0x0018($sp)
+    sw      $t1, 0x001C($sp)
+    sw      $t2, 0x0020($sp)
+    sw      $t3, 0x0024($sp)
+    sw      $t4, 0x0028($sp)
+    sw      $t5, 0x002C($sp)
+    sw      $t6, 0x0030($sp)
+    sw      $t7, 0x0034($sp)
+    sw      $t8, 0x0038($sp)
+    sw      $t9, 0x003C($sp)
+    sw      $s2, 0x0048($sp)
+    sw      $s3, 0x004C($sp)
+    sw      $s4, 0x0050($sp)
+    sw      $s5, 0x0054($sp)
+    sw      $s6, 0x0058($sp)
+    sw      $s7, 0x005C($sp)
+    sw      $s8, 0x0060($sp)
+    sw      $ra, 0x0064($sp)
+
+CCloop1:
+    jal     FindCC
+    nop
+    addiu   $s0, $s0, 0x0001
+    slti    $t1, $s0, 0x0004
+    bnez    $t1, CCloop1
+    addu    $s1, $s1, $v0
+    srl     $a0, $s1, 2
+    jal     WriteCC
+    li      $a1, 0x0001
+    lw      $ra, 0x0064($sp)
+    srl     $v0, $s1, 2
+    lw      $s1, 0x0044($sp)
+    lw      $v1, 0x0004($sp)
+    lw      $a0, 0x0008($sp)
+    lw      $a1, 0x000C($sp)
+    lw      $a2, 0x0010($sp)
+    lw      $a3, 0x0014($sp)
+    lw      $t0, 0x0018($sp)
+    lw      $t1, 0x001C($sp)
+    lw      $t2, 0x0020($sp)
+    lw      $t3, 0x0024($sp)
+    lw      $t4, 0x0028($sp)
+    lw      $t5, 0x002C($sp)
+    lw      $t6, 0x0030($sp)
+    lw      $t7, 0x0034($sp)
+    lw      $t8, 0x0038($sp)
+    lw      $t9, 0x003C($sp)
+    lw      $s0, 0x0040($sp)
+    lw      $s2, 0x0048($sp)
+    lw      $s3, 0x004C($sp)
+    lw      $s4, 0x0050($sp)
+    lw      $s5, 0x0054($sp)
+    lw      $s6, 0x0058($sp)
+    lw      $s7, 0x005C($sp)
+    lw      $s8, 0x0060($sp)
+    jr      $ra
+    addiu   $sp, $sp, 0x00A0
+
+FindCC:
+    addiu   $sp, $sp, -0x0020
+    sw      $ra, 0x001C($sp)
+    move    $t1, $0
+    move    $t3, $0
+    move    $t4, $0
+
+prepass_loop:
+    slti    $k0, $t4, 0x0040
+    beqzl   $k0, done_findcc.L
+    move    $v0, $0
+    jal     TestCCValue
+    move    $a0, $t4
+    blezl   $v0, next_pass.L
+    slti    $k0, $t1, 0x0050
+    subu    $k0, $v0, $t1
+    multu   $k0, $t4
+    move    $t1, $v0
+    mflo    $k0
+    addu    $t3, $t3, $k0
+    nop
+    slti    $k0, $t1, 0x0050
+
+next_pass.L:
+    bnez    $k0, prepass_loop
+    addiu   $t4, $t4, 0x0001
+    sll     $a0, $t3, 2
+    subu    $a0, $a0, $t3
+    sll     $a0, $a0, 2
+    subu    $a0, $a0, $t3
+    sll     $a0, $a0, 1
+    jal     ConvertManualToAuto
+    addiu   $a0, $a0, -0x0370
+    b       return_findcc.L
+    lw      $ra, 0x001C($sp)
+    move    $v0, $0
+
+done_findcc.L:
+    lw      $ra, 0x001C($sp)
+
+return_findcc.L:
+    addiu   $sp, $sp, 0x0020
+    jr      $ra
+    nop
+
+TestCCValue:
+    addiu   $sp, $sp, -0x0028
+    sw      $ra, 0x001C($sp)
+    move    $v0, $0
+    jal     WriteCC
+    li      $a1, 0x0002
+    move    $s8, $0
+    li      $k0, -0x0001
+
+jloop.L:
+    sw      $k0, 0x0004($s4)
+    lw      $v1, 0x0004($s4)
+    sw      $k0, 0x0000($s4)
+    sw      $k0, 0x0000($s4)
+    move    $gp, $0
+    srl     $v1, $v1, 16
+
+kloop:
+    andi    $k0, $v1, 0x0001
+    beqzl   $k0, no_passcount.L
+    addiu   $gp, $gp, 0x0001
+    addiu   $v0, $v0, 0x0001
+    addiu   $gp, $gp, 0x0001
+
+no_passcount.L:
+    slti    $k0, $gp, 0x0008
+    bnez    $k0, kloop
+    srl     $v1, $v1, 1
+    addiu   $s8, $s8, 0x0001
+    slti    $k0, $s8, 0x000A
+    bnezl   $k0, jloop.L
+    li      $k0, -0x0001
+    lw      $ra, 0x001C($sp)
+    addiu   $sp, $sp, 0x0028
+    jr      $ra
+    nop
+
+ConvertManualToAuto:
+    addiu   $sp, $sp, -0x0028
+    sw      $ra, 0x001C($sp)
+    sw      $a0, 0x0020($sp)
+    sb      $0, 0x0027($sp)
+    move    $t0, $0
+    move    $t2, $0
+    li      $t5, 0xC800
+    move    $t6, $0
+    slti    $k0, $t6, 0x0040
+
+big_loop.L:
+    bnezl   $k0, coverloop.L
+    move    $a0, $t6
+    b       convert_done
+    move    $v0, $0
+    move    $a0, $t6
+
+coverloop.L:
+    jal     WriteCC
+    li      $a1, 0x0001
+    jal     ReadCC
+    addiu   $a0, $sp, 0x0027
+    jal     ReadCC
+    addiu   $a0, $sp, 0x0027
+    lbu     $k0, 0x0027($sp)
+    li      $k1, 0x0320
+    lw      $a0, 0x0020($sp)
+    multu   $k0, $k1
+    mflo    $t0
+    subu    $k0, $t0, $a0
+    bgezl   $k0, pos.L
+    slt     $k1, $k0, $t5
+    subu    $k0, $a0, $t0
+    slt     $k1, $k0, $t5
+
+pos.L:
+    beqzl   $k1, compare_done.L
+    lw      $a0, 0x0020($sp)
+    move    $t5, $k0
+    move    $t2, $t6
+    lw      $a0, 0x0020($sp)
+
+compare_done.L:
+    slt     $k1, $t0, $a0
+    beqzl   $k1, return_value.L
+    addu    $v0, $t2, $t6
+    addiu   $t6, $t6, 0x0001
+    slti    $k1, $t6, 0x0041
+    bnezl   $k1, big_loop.L
+    slti    $k0, $t6, 0x0040
+    addu    $v0, $t2, $t6
+
+return_value.L:
+    srl     $v0, $v0, 1
+
+convert_done:
+    lw      $ra, 0x001C($sp)
+    addiu   $sp, $sp, 0x0028
+    jr      $ra
+    nop
+
+WriteCC:
+    addiu   $sp, $sp, -0x0028
+    andi    $a0, $a0, 0x00FF
+    li      $k1, 0x0001
+    xori    $a0, $a0, 0x003F
+    sw      $ra, 0x001C($sp)
+    bne     $a1, $k1, non_auto
+    li      $t7, 0x46000000
+    li      $k0, 0x80000000
+    or      $t7, $t7, $k0
+
+non_auto:
+    andi    $k0, $a0, 0x0001
+    sll     $k0, $k0, 6
+    or      $t7, $t7, $k0
+    andi    $k0, $a0, 0x0002
+    sll     $k0, $k0, 13
+    or      $t7, $t7, $k0
+    andi    $k0, $a0, 0x0004
+    sll     $k0, $k0, 20
+    or      $t7, $t7, $k0
+    andi    $k0, $a0, 0x0008
+    sll     $k0, $k0, 4
+    or      $t7, $t7, $k0
+    andi    $k0, $a0, 0x0010
+    sll     $k0, $k0, 11
+    or      $t7, $t7, $k0
+    andi    $k0, $a0, 0x0020
+    sll     $k0, $k0, 18
+    or      $t7, $t7, $k0
+    li      $k1, 0x0001
+    bne     $a1, $k1, write_done
+    sw      $t7, 0x0000($s5)
+    lui     $k0, %hi(0xA4300000)
+    sw      $0, %lo(0xA4300000)($k0)
+
+write_done:
+    lw      $ra, 0x001C($sp)
+    addiu   $sp, $sp, 0x0028
+    jr      $ra
+    nop
+
+ReadCC:
+    addiu   $sp, $sp, -0x0028
+    sw      $ra, 0x001C($sp)
+    li      $k0, 0x2000
+    lui     $k1, %hi(0xA4300000)
+    sw      $k0, %lo(0xA4300000)($k1)
+    move    $s8, $0
+    lw      $s8, 0x0000($s5)
+    li      $k0, 0x1000
+    sw      $k0, %lo(0xA4300000)($k1)
+    li      $k1, 0x0040
+    and     $k1, $k1, $s8
+    srl     $k1, $k1, 6
+    move    $k0, $0
+    or      $k0, $k0, $k1
+    li      $k1, 0x4000
+    and     $k1, $k1, $s8
+    srl     $k1, $k1, 13
+    or      $k0, $k0, $k1
+    li      $k1, 0x00400000
+    and     $k1, $k1, $s8
+    srl     $k1, $k1, 20
+    or      $k0, $k0, $k1
+    li      $k1, 0x0080
+    and     $k1, $k1, $s8
+    srl     $k1, $k1, 4
+    or      $k0, $k0, $k1
+    li      $k1, 0x8000
+    and     $k1, $k1, $s8
+    srl     $k1, $k1, 11
+    or      $k0, $k0, $k1
+    li      $k1, 0x00800000
+    and     $k1, $k1, $s8
+    srl     $k1, $k1, 18
+    or      $k0, $k0, $k1
+    sb      $k0, 0x0000($a0)
+    lw      $ra, 0x001C($sp)
+    addiu   $sp, $sp, 0x0028
+    jr      $ra
+    nop

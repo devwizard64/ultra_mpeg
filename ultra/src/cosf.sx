@@ -1,0 +1,107 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+.set fp=32
+
+.align 4
+
+/* float cosf(float angle) */
+.globl cosf
+cosf:
+    swc1    $f12, 0x0000($sp)
+    lw      $v0, 0x0000($sp)
+    lwc1    $f6, 0x0000($sp)
+    lwc1    $f10, 0x0000($sp)
+    sra     $t6, $v0, 22
+    andi    $t7, $t6, 0x01FF
+    slti    $at, $t7, 0x0136
+    beqzl   $at, .L80325454
+    c.eq.s  $f10, $f10
+    mtc1    $0, $f4
+    li      $at, 0x3FE00000
+    mtc1    $at, $f19
+    c.lt.s  $f4, $f6
+    lwc1    $f0, 0x0000($sp)
+    lui     $at, %hi(cosf__rpi)
+    bc1fl   .L80325360
+    neg.s   $f0, $f0
+    b       .L80325360
+    mov.s   $f0, $f6
+    neg.s   $f0, $f0
+.L80325360:
+    ldc1    $f8, %lo(cosf__rpi)($at)
+    cvt.d.s $f12, $f0
+    mtc1    $0, $f18
+    mul.d   $f10, $f12, $f8
+    mtc1    $0, $f5
+    mtc1    $0, $f4
+    add.d   $f14, $f10, $f18
+    c.le.d  $f4, $f14
+    nop
+    bc1fl   .L803253A4
+    sub.d   $f10, $f14, $f18
+    add.d   $f6, $f14, $f18
+    trunc.w.d $f8, $f6
+    mfc1    $v0, $f8
+    b       .L803253B4
+    mtc1    $v0, $f6
+    sub.d   $f10, $f14, $f18
+.L803253A4:
+    trunc.w.d $f4, $f10
+    mfc1    $v0, $f4
+    nop
+    mtc1    $v0, $f6
+.L803253B4:
+    lui     $at, %hi(cosf__pihi)
+    ldc1    $f10, %lo(cosf__pihi)($at)
+    cvt.d.w $f8, $f6
+    lui     $at, %hi(cosf__pilo)
+    ldc1    $f6, %lo(cosf__pilo)($at)
+    lui     $v1, %hi(cosf__P)
+    addiu   $v1, %lo(cosf__P)
+    sub.d   $f0, $f8, $f18
+    andi    $t0, $v0, 0x0001
+    mul.d   $f4, $f0, $f10
+    ldc1    $f10, 0x0020($v1)
+    mul.d   $f8, $f0, $f6
+    ldc1    $f6, 0x0018($v1)
+    sub.d   $f2, $f12, $f4
+    sub.d   $f2, $f2, $f8
+    mul.d   $f14, $f2, $f2
+    nop
+    mul.d   $f4, $f10, $f14
+    add.d   $f8, $f4, $f6
+    ldc1    $f4, 0x0010($v1)
+    mul.d   $f10, $f8, $f14
+    add.d   $f6, $f10, $f4
+    ldc1    $f10, 0x0008($v1)
+    mul.d   $f8, $f6, $f14
+    bnez    $t0, .L80325434
+    add.d   $f16, $f10, $f8
+    mul.d   $f4, $f2, $f14
+    nop
+    mul.d   $f6, $f4, $f16
+    add.d   $f10, $f6, $f2
+    jr      $ra
+    cvt.s.d $f0, $f10
+.L80325434:
+    mul.d   $f8, $f2, $f14
+    nop
+    mul.d   $f4, $f8, $f16
+    add.d   $f6, $f4, $f2
+    cvt.s.d $f0, $f6
+    jr      $ra
+    neg.s   $f0, $f0
+    c.eq.s  $f10, $f10
+.L80325454:
+    lui     $at, %hi(cosf__zero)
+    bc1t    .L8032546C
+    nop
+    lui     $at, %hi(__libm_qnan_f)
+    jr      $ra
+    lwc1    $f0, %lo(__libm_qnan_f)($at)
+.L8032546C:
+    lwc1    $f0, %lo(cosf__zero)($at)
+    jr      $ra
+    nop

@@ -1,0 +1,218 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+.globl _Litob
+_Litob:
+    addiu   $sp, $sp, -0x0070
+    sw      $a1, 0x0074($sp)
+    lbu     $t6, 0x0077($sp)
+    li      $at, 0x0058
+    sw      $ra, 0x0024($sp)
+    sw      $a0, 0x0070($sp)
+    bne     $t6, $at, .L803297C0
+    sw      $s0, 0x0020($sp)
+    lui     $t7, %hi(udigs)
+    addiu   $t7, %lo(udigs)
+    b       .L803297CC
+    sw      $t7, 0x0054($sp)
+.L803297C0:
+    lui     $t8, %hi(ldigs)
+    addiu   $t8, %lo(ldigs)
+    sw      $t8, 0x0054($sp)
+.L803297CC:
+    lbu     $t9, 0x0077($sp)
+    li      $at, 0x006F
+    bne     $t9, $at, .L803297E8
+    nop
+    li      $t0, 0x0008
+    b       .L80329810
+    sw      $t0, 0x0050($sp)
+.L803297E8:
+    lbu     $t1, 0x0077($sp)
+    li      $at, 0x0078
+    beq     $t1, $at, .L80329808
+    li      $at, 0x0058
+    beq     $t1, $at, .L80329808
+    nop
+    b       .L8032980C
+    li      $s0, 0x000A
+.L80329808:
+    li      $s0, 0x0010
+.L8032980C:
+    sw      $s0, 0x0050($sp)
+.L80329810:
+    lw      $t3, 0x0070($sp)
+    li      $t2, 0x0018
+    sw      $t2, 0x004C($sp)
+    lbu     $t6, 0x0077($sp)
+    lw      $t5, 0x0004($t3)
+    lw      $t4, 0x0000($t3)
+    li      $at, 0x0064
+    sw      $t5, 0x0044($sp)
+    beq     $t6, $at, .L80329844
+    sw      $t4, 0x0040($sp)
+    li      $at, 0x0069
+    bne     $t6, $at, .L80329888
+    nop
+.L80329844:
+    lw      $t7, 0x0070($sp)
+    lw      $t8, 0x0000($t7)
+    lw      $t9, 0x0004($t7)
+    bgtz    $t8, .L80329888
+    nop
+    bltz    $t8, .L80329868
+    nop
+    b       .L80329888
+    nop
+.L80329868:
+    lw      $t0, 0x0040($sp)
+    lw      $t1, 0x0044($sp)
+    nor     $t2, $t0, $0
+    sltiu   $at, $t1, 0x0001
+    addu    $t2, $t2, $at
+    subu    $t3, $0, $t1
+    sw      $t3, 0x0044($sp)
+    sw      $t2, 0x0040($sp)
+.L80329888:
+    lw      $t4, 0x0040($sp)
+    lw      $t5, 0x0044($sp)
+    bnez    $t4, .L803298B0
+    nop
+    bnez    $t5, .L803298B0
+    nop
+    lw      $t6, 0x0070($sp)
+    lw      $t7, 0x0024($t6)
+    beqz    $t7, .L803298EC
+    nop
+.L803298B0:
+    lw      $s0, 0x004C($sp)
+    lw      $t8, 0x0050($sp)
+    lw      $a0, 0x0040($sp)
+    addiu   $s0, $s0, -0x0001
+    sw      $s0, 0x004C($sp)
+    lw      $a1, 0x0044($sp)
+    move    $a3, $t8
+    jal     __ull_rem
+    sra     $a2, $t8, 31
+    lw      $t0, 0x0054($sp)
+    move    $t9, $v1
+    addu    $t3, $sp, $s0
+    addu    $t1, $t9, $t0
+    lbu     $t2, 0x0000($t1)
+    sb      $t2, 0x0058($t3)
+.L803298EC:
+    lw      $t4, 0x0050($sp)
+    lw      $a0, 0x0040($sp)
+    lw      $a1, 0x0044($sp)
+    move    $a3, $t4
+    jal     __ull_div
+    sra     $a2, $t4, 31
+    lw      $t5, 0x0070($sp)
+    sw      $v0, 0x0000($t5)
+    sw      $v1, 0x0004($t5)
+    lw      $t6, 0x0070($sp)
+    lw      $t8, 0x0000($t6)
+    lw      $t9, 0x0004($t6)
+    bltz    $t8, .L803299D8
+    nop
+    bgtz    $t8, .L80329934
+    nop
+    beqz    $t9, .L803299D8
+    nop
+.L80329934:
+    lw      $t7, 0x004C($sp)
+    blez    $t7, .L803299D8
+    nop
+.L80329940:
+    lw      $t0, 0x0070($sp)
+    lw      $t1, 0x0050($sp)
+    addiu   $a0, $sp, 0x0030
+    lw      $a2, 0x0000($t0)
+    lw      $a3, 0x0004($t0)
+    move    $t3, $t1
+    sra     $t2, $t1, 31
+    sw      $t2, 0x0010($sp)
+    jal     lldiv
+    sw      $t3, 0x0014($sp)
+    lw      $t6, 0x0070($sp)
+    lw      $t4, 0x0030($sp)
+    lw      $t5, 0x0034($sp)
+    sw      $t4, 0x0000($t6)
+    sw      $t5, 0x0004($t6)
+    lw      $t9, 0x003C($sp)
+    lw      $s0, 0x004C($sp)
+    lw      $t0, 0x0054($sp)
+    move    $t7, $t9
+    addiu   $s0, $s0, -0x0001
+    sw      $s0, 0x004C($sp)
+    addu    $t1, $t7, $t0
+    lbu     $t2, 0x0000($t1)
+    addu    $t3, $sp, $s0
+    lw      $t8, 0x0038($sp)
+    sb      $t2, 0x0058($t3)
+    lw      $t4, 0x0070($sp)
+    lw      $t6, 0x0000($t4)
+    lw      $t7, 0x0004($t4)
+    bltz    $t6, .L803299D8
+    nop
+    bgtz    $t6, .L803299CC
+    nop
+    beqz    $t7, .L803299D8
+    nop
+.L803299CC:
+    lw      $t5, 0x004C($sp)
+    bgtz    $t5, .L80329940
+    nop
+.L803299D8:
+    lw      $t8, 0x004C($sp)
+    lw      $t1, 0x0070($sp)
+    li      $t9, 0x0018
+    subu    $t0, $t9, $t8
+    sw      $t0, 0x0014($t1)
+    lw      $t2, 0x0070($sp)
+    lw      $t3, 0x004C($sp)
+    addiu   $t4, $sp, 0x0058
+    lw      $a0, 0x0008($t2)
+    lw      $a2, 0x0014($t2)
+    jal     memcpy
+    addu    $a1, $t3, $t4
+    lw      $t6, 0x0070($sp)
+    lw      $t7, 0x0014($t6)
+    lw      $t5, 0x0024($t6)
+    slt     $at, $t7, $t5
+    beqz    $at, .L80329A28
+    nop
+    subu    $t9, $t5, $t7
+    sw      $t9, 0x0010($t6)
+.L80329A28:
+    lw      $t8, 0x0070($sp)
+    lw      $t0, 0x0024($t8)
+    bgez    $t0, .L80329A7C
+    nop
+    lw      $t1, 0x0030($t8)
+    li      $at, 0x0010
+    andi    $t3, $t1, 0x0014
+    bne     $t3, $at, .L80329A7C
+    nop
+    lw      $t4, 0x0028($t8)
+    lw      $t2, 0x000C($t8)
+    lw      $t7, 0x0010($t8)
+    lw      $t6, 0x0014($t8)
+    subu    $t5, $t4, $t2
+    subu    $t9, $t5, $t7
+    subu    $t0, $t9, $t6
+    blez    $t0, .L80329A7C
+    sw      $t0, 0x004C($sp)
+    lw      $t1, 0x0010($t8)
+    addu    $t3, $t1, $t0
+    sw      $t3, 0x0010($t8)
+.L80329A7C:
+    lw      $ra, 0x0024($sp)
+    lw      $s0, 0x0020($sp)
+    addiu   $sp, $sp, 0x0070
+    jr      $ra
+    nop

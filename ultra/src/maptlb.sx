@@ -1,0 +1,68 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void osMapTLB(
+    int index,
+    OSPageMask pm,
+    void *vaddr,
+    u32 evenpaddr,
+    u32 oddpaddr,
+    s32 asid
+) */
+.globl osMapTLB
+osMapTLB:
+    mfc0    $t0, C0_ENTRYHI
+    mtc0    $a0, C0_INX
+    mtc0    $a1, C0_PAGEMASK
+    lw      $t1, 0x0014($sp)
+    li      $at, -0x0001
+    beq     $t1, $at, .L80322408
+    li      $t4, 0x0001
+    li      $t2, 0x001E
+    b       .L8032240C
+    or      $a2, $a2, $t1
+.L80322408:
+    li      $t2, 0x001F
+.L8032240C:
+    mtc0    $a2, C0_ENTRYHI
+    li      $at, -0x0001
+    beq     $a3, $at, .L80322430
+    nop
+    srl     $t3, $a3, 6
+    or      $t3, $t3, $t2
+    mtc0    $t3, C0_ENTRYLO0
+    b       .L80322434
+    nop
+.L80322430:
+    mtc0    $t4, C0_ENTRYLO0
+.L80322434:
+    lw      $t3, 0x0010($sp)
+    li      $at, -0x0001
+    beq     $t3, $at, .L80322458
+    nop
+    srl     $t3, $t3, 6
+    or      $t3, $t3, $t2
+    mtc0    $t3, C0_ENTRYLO1
+    b       .L80322470
+    nop
+.L80322458:
+    mtc0    $t4, C0_ENTRYLO1
+    li      $at, -0x0001
+    bne     $a3, $at, .L80322470
+    nop
+    li      $t3, 0x80000000
+    mtc0    $t3, C0_ENTRYHI
+.L80322470:
+    nop
+    tlbwi
+    nop
+    nop
+    nop
+    nop
+    mtc0    $t0, C0_ENTRYHI
+    jr      $ra
+    nop

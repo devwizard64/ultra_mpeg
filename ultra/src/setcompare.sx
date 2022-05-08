@@ -1,0 +1,13 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void __osSetCompare(u32 value) */
+.globl __osSetCompare
+__osSetCompare:
+    mtc0    $a0, C0_COMPARE
+    jr      $ra
+    nop

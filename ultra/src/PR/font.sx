@@ -1,0 +1,4 @@
+.data
+.align 4
+
+.incbin "src/PR/font"

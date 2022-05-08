@@ -1,0 +1,13 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* u32 osGetCount(void) */
+.globl osGetCount
+osGetCount:
+    mfc0    $v0, C0_COUNT
+    jr      $ra
+    nop

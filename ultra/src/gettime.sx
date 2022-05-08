@@ -1,0 +1,43 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* OSTime osGetTime(void) */
+.globl osGetTime
+osGetTime:
+    addiu   $sp, $sp, -0x0038
+    sw      $ra, 0x001C($sp)
+    jal     __osDisableInt
+    sw      $s0, 0x0018($sp)
+    jal     osGetCount
+    move    $s0, $v0
+    sw      $v0, 0x0034($sp)
+    lui     $t7, %hi(__osBaseCounter)
+    lw      $t7, %lo(__osBaseCounter)($t7)
+    lw      $t6, 0x0034($sp)
+    lui     $t0, %hi(__osCurrentTime+0)
+    lui     $t1, %hi(__osCurrentTime+4)
+    lw      $t1, %lo(__osCurrentTime+4)($t1)
+    lw      $t0, %lo(__osCurrentTime+0)($t0)
+    subu    $t8, $t6, $t7
+    sw      $t8, 0x0030($sp)
+    move    $a0, $s0
+    sw      $t1, 0x002C($sp)
+    jal     __osRestoreInt
+    sw      $t0, 0x0028($sp)
+    lw      $t9, 0x0030($sp)
+    lw      $t5, 0x002C($sp)
+    lw      $ra, 0x001C($sp)
+    move    $t3, $t9
+    addu    $v1, $t3, $t5
+    lw      $t4, 0x0028($sp)
+    li      $t2, 0x0000
+    sltu    $at, $v1, $t5
+    addu    $v0, $at, $t2
+    lw      $s0, 0x0018($sp)
+    addiu   $sp, $sp, 0x0038
+    jr      $ra
+    addu    $v0, $v0, $t4

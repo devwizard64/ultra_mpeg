@@ -1,0 +1,210 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* OSTask *_VirtualToPhysicalTask(OSTask *) */
+_VirtualToPhysicalTask:
+    addiu   $sp, $sp, -0x0020
+    lui     $t6, %hi(tmp_task)
+    sw      $ra, 0x0014($sp)
+    sw      $a0, 0x0020($sp)
+    addiu   $t6, %lo(tmp_task)
+    sw      $t6, 0x001C($sp)
+    move    $a1, $t6
+    lw      $a0, 0x0020($sp)
+    jal     bcopy
+    li      $a2, 0x0040
+    lw      $t7, 0x001C($sp)
+    lw      $t8, 0x0010($t7)
+    beqz    $t8, .L80322988
+    nop
+    jal     osVirtualToPhysical
+    move    $a0, $t8
+    lw      $t9, 0x001C($sp)
+    sw      $v0, 0x0010($t9)
+.L80322988:
+    lw      $t0, 0x001C($sp)
+    lw      $t1, 0x0018($t0)
+    beqz    $t1, .L803229A8
+    nop
+    jal     osVirtualToPhysical
+    move    $a0, $t1
+    lw      $t2, 0x001C($sp)
+    sw      $v0, 0x0018($t2)
+.L803229A8:
+    lw      $t3, 0x001C($sp)
+    lw      $t4, 0x0020($t3)
+    beqz    $t4, .L803229C8
+    nop
+    jal     osVirtualToPhysical
+    move    $a0, $t4
+    lw      $t5, 0x001C($sp)
+    sw      $v0, 0x0020($t5)
+.L803229C8:
+    lw      $t6, 0x001C($sp)
+    lw      $t7, 0x0028($t6)
+    beqz    $t7, .L803229E8
+    nop
+    jal     osVirtualToPhysical
+    move    $a0, $t7
+    lw      $t8, 0x001C($sp)
+    sw      $v0, 0x0028($t8)
+.L803229E8:
+    lw      $t9, 0x001C($sp)
+    lw      $t0, 0x002C($t9)
+    beqz    $t0, .L80322A08
+    nop
+    jal     osVirtualToPhysical
+    move    $a0, $t0
+    lw      $t1, 0x001C($sp)
+    sw      $v0, 0x002C($t1)
+.L80322A08:
+    lw      $t2, 0x001C($sp)
+    lw      $t3, 0x0030($t2)
+    beqz    $t3, .L80322A28
+    nop
+    jal     osVirtualToPhysical
+    move    $a0, $t3
+    lw      $t4, 0x001C($sp)
+    sw      $v0, 0x0030($t4)
+.L80322A28:
+    lw      $t5, 0x001C($sp)
+    lw      $t6, 0x0038($t5)
+    beqz    $t6, .L80322A48
+    nop
+    jal     osVirtualToPhysical
+    move    $a0, $t6
+    lw      $t7, 0x001C($sp)
+    sw      $v0, 0x0038($t7)
+.L80322A48:
+    lw      $ra, 0x0014($sp)
+    lw      $v0, 0x001C($sp)
+    addiu   $sp, $sp, 0x0020
+    jr      $ra
+    nop
+
+/* void osSpTaskLoad(OSTask *task) */
+.globl osSpTaskLoad
+osSpTaskLoad:
+    addiu   $sp, $sp, -0x0020
+    sw      $ra, 0x0014($sp)
+    sw      $a0, 0x0020($sp)
+    jal     _VirtualToPhysicalTask
+    lw      $a0, 0x0020($sp)
+    sw      $v0, 0x001C($sp)
+    lw      $t6, 0x001C($sp)
+    lw      $t7, 0x0004($t6)
+    andi    $t8, $t7, 0x0001
+    beqz    $t8, .L80322AB0
+    nop
+    lw      $t9, 0x0038($t6)
+    li      $at, -0x0002
+    sw      $t9, 0x0018($t6)
+    lw      $t0, 0x001C($sp)
+    lw      $t1, 0x003C($t0)
+    sw      $t1, 0x001C($t0)
+    lw      $t2, 0x0020($sp)
+    lw      $t3, 0x0004($t2)
+    and     $t4, $t3, $at
+    sw      $t4, 0x0004($t2)
+.L80322AB0:
+    lw      $a0, 0x001C($sp)
+    jal     osWritebackDCache
+    li      $a1, 0x0040
+    jal     __osSpSetStatus
+    li      $a0, 0x2B00
+    lui     $a0, 0x04001000 >> 16
+    jal     __osSpSetPc
+    ori     $a0, 0x04001000 & 0xFFFF
+    li      $at, -0x0001
+    bne     $v0, $at, .L80322AF4
+    nop
+.L80322ADC:
+    lui     $a0, 0x04001000 >> 16
+    jal     __osSpSetPc
+    ori     $a0, 0x04001000 & 0xFFFF
+    li      $at, -0x0001
+    beq     $v0, $at, .L80322ADC
+    nop
+.L80322AF4:
+    lui     $a1, 0x04000FC0 >> 16
+    ori     $a1, 0x04000FC0 & 0xFFFF
+    li      $a0, 0x0001
+    lw      $a2, 0x001C($sp)
+    jal     __osSpRawStartDma
+    li      $a3, 0x0040
+    li      $at, -0x0001
+    bne     $v0, $at, .L80322B3C
+    nop
+.L80322B18:
+    lui     $a1, 0x04000FC0 >> 16
+    ori     $a1, 0x04000FC0 & 0xFFFF
+    li      $a0, 0x0001
+    lw      $a2, 0x001C($sp)
+    jal     __osSpRawStartDma
+    li      $a3, 0x0040
+    li      $at, -0x0001
+    beq     $v0, $at, .L80322B18
+    nop
+.L80322B3C:
+    jal     __osSpDeviceBusy
+    nop
+    beqz    $v0, .L80322B5C
+    nop
+.L80322B4C:
+    jal     __osSpDeviceBusy
+    nop
+    bnez    $v0, .L80322B4C
+    nop
+.L80322B5C:
+    lw      $t5, 0x001C($sp)
+    lui     $a1, 0x04001000 >> 16
+    ori     $a1, 0x04001000 & 0xFFFF
+    li      $a0, 0x0001
+    lw      $a2, 0x0008($t5)
+    jal     __osSpRawStartDma
+    lw      $a3, 0x000C($t5)
+    li      $at, -0x0001
+    bne     $v0, $at, .L80322BAC
+    nop
+.L80322B84:
+    lw      $t7, 0x001C($sp)
+    lui     $a1, 0x04001000 >> 16
+    ori     $a1, 0x04001000 & 0xFFFF
+    li      $a0, 0x0001
+    lw      $a2, 0x0008($t7)
+    jal     __osSpRawStartDma
+    lw      $a3, 0x000C($t7)
+    li      $at, -0x0001
+    beq     $v0, $at, .L80322B84
+    nop
+.L80322BAC:
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0020
+    jr      $ra
+    nop
+
+/* void osSpTaskStartGo(OSTask *task) */
+.globl osSpTaskStartGo
+osSpTaskStartGo:
+    addiu   $sp, $sp, -0x0018
+    sw      $ra, 0x0014($sp)
+    jal     __osSpDeviceBusy
+    sw      $a0, 0x0018($sp)
+    beqz    $v0, .L80322BE4
+    nop
+.L80322BD4:
+    jal     __osSpDeviceBusy
+    nop
+    bnez    $v0, .L80322BD4
+    nop
+.L80322BE4:
+    jal     __osSpSetStatus
+    li      $a0, 0x0125
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0018
+    jr      $ra
+    nop

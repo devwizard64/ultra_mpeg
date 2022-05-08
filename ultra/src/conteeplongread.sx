@@ -1,0 +1,94 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void osEepromLongRead(OSMesgQueue *mq, u8 address, u8 *buffer, s32 nbytes) */
+.globl osEepromLongRead
+osEepromLongRead:
+    addiu   $sp, $sp, -0x0040
+    sw      $a1, 0x0044($sp)
+    lbu     $t6, 0x0047($sp)
+    sw      $ra, 0x0024($sp)
+    sw      $a0, 0x0040($sp)
+    slti    $at, $t6, 0x0041
+    sw      $a2, 0x0048($sp)
+    sw      $a3, 0x004C($sp)
+    bnez    $at, .L803246C0
+    sw      $0, 0x003C($sp)
+    b       .L803247BC
+    li      $v0, -0x0001
+.L803246C0:
+    lw      $t7, 0x004C($sp)
+    blez    $t7, .L803247B8
+    nop
+.L803246CC:
+    lw      $a0, 0x0040($sp)
+    lbu     $a1, 0x0047($sp)
+    jal     osEepromRead
+    lw      $a2, 0x0048($sp)
+    sw      $v0, 0x003C($sp)
+    lw      $t8, 0x003C($sp)
+    beqz    $t8, .L803246F4
+    nop
+    b       .L803247BC
+    move    $v0, $t8
+.L803246F4:
+    lw      $t9, 0x004C($sp)
+    lbu     $t1, 0x0047($sp)
+    lw      $t3, 0x0048($sp)
+    lui     $a2, %hi(osClockRate+0)
+    lui     $a3, %hi(osClockRate+4)
+    addiu   $t0, $t9, -0x0008
+    addiu   $t2, $t1, 0x0001
+    addiu   $t4, $t3, 0x0008
+    sw      $t0, 0x004C($sp)
+    sb      $t2, 0x0047($sp)
+    sw      $t4, 0x0048($sp)
+    lw      $a3, %lo(osClockRate+4)($a3)
+    lw      $a2, %lo(osClockRate+0)($a2)
+    li      $a0, 0x0000
+    jal     __ll_mul
+    li      $a1, 0x2EE0
+    sw      $v0, 0x0028($sp)
+    sw      $v1, 0x002C($sp)
+    lui     $a3, 0x000F4240 >> 16
+    ori     $a3, 0x000F4240 & 0xFFFF
+    lw      $a1, 0x002C($sp)
+    lw      $a0, 0x0028($sp)
+    jal     __ull_div
+    li      $a2, 0x0000
+    lui     $t5, %hi(__osEepromTimerQ)
+    lui     $t8, %hi(__osEepromTimerMsg)
+    addiu   $t8, %lo(__osEepromTimerMsg)
+    addiu   $t5, %lo(__osEepromTimerQ)
+    sw      $v0, 0x0030($sp)
+    sw      $v1, 0x0034($sp)
+    lui     $a0, %hi(__osEepromTimer)
+    li      $t6, 0x0000
+    li      $t7, 0x0000
+    sw      $t7, 0x0014($sp)
+    sw      $t6, 0x0010($sp)
+    addiu   $a0, %lo(__osEepromTimer)
+    lw      $a3, 0x0034($sp)
+    lw      $a2, 0x0030($sp)
+    sw      $t5, 0x0018($sp)
+    jal     osSetTimer
+    sw      $t8, 0x001C($sp)
+    lui     $a0, %hi(__osEepromTimerQ)
+    addiu   $a0, %lo(__osEepromTimerQ)
+    move    $a1, $0
+    jal     osRecvMesg
+    li      $a2, 0x0001
+    lw      $t9, 0x004C($sp)
+    bgtz    $t9, .L803246CC
+    nop
+.L803247B8:
+    lw      $v0, 0x003C($sp)
+.L803247BC:
+    lw      $ra, 0x0024($sp)
+    addiu   $sp, $sp, 0x0040
+    jr      $ra
+    nop

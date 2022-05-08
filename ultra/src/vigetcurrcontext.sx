@@ -1,0 +1,12 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+.globl __osViGetCurrentContext
+__osViGetCurrentContext:
+    lui     $v0, %hi(__osViCurr)
+    jr      $ra
+    lw      $v0, %lo(__osViCurr)($v0)

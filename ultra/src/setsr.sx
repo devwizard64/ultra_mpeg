@@ -1,0 +1,14 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void __osSetSR(u32 value) */
+.globl __osSetSR
+__osSetSR:
+    mtc0    $a0, C0_SR
+    nop
+    jr      $ra
+    nop

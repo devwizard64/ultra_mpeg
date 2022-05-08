@@ -1,0 +1,17 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* OSPri osGetThreadPri(OSThread *t) */
+.globl osGetThreadPri
+osGetThreadPri:
+    bnez    $a0, .L80328060
+    nop
+    lui     $a0, %hi(__osRunningThread)
+    lw      $a0, %lo(__osRunningThread)($a0)
+.L80328060:
+    jr      $ra
+    lw      $v0, 0x0004($a0)

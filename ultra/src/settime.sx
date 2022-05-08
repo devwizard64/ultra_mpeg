@@ -1,0 +1,19 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void osSetTime(OSTime time) */
+.globl osSetTime
+osSetTime:
+    sw      $a0, 0x0000($sp)
+    lw      $t6, 0x0000($sp)
+    sw      $a1, 0x0004($sp)
+    lui     $at, %hi(__osCurrentTime+0)
+    lw      $t7, 0x0004($sp)
+    sw      $t6, %lo(__osCurrentTime+0)($at)
+    lui     $at, %hi(__osCurrentTime+4)
+    jr      $ra
+    sw      $t7, %lo(__osCurrentTime+4)($at)

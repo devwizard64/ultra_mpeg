@@ -1,0 +1,88 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+.globl __osSyncPutChars
+__osSyncPutChars:
+    addiu   $sp, $sp, -0x0028
+    sw      $a0, 0x0028($sp)
+    lw      $t6, 0x0028($sp)
+    lbu     $t0, 0x0024($sp)
+    sw      $a1, 0x002C($sp)
+    andi    $t7, $t6, 0x0003
+    lw      $t3, 0x002C($sp)
+    sll     $t8, $t7, 6
+    andi    $t9, $t8, 0x00C0
+    andi    $t1, $t0, 0xFF3F
+    or      $t2, $t9, $t1
+    andi    $t6, $t2, 0x00FF
+    andi    $t4, $t3, 0x0003
+    andi    $t5, $t4, 0x0003
+    andi    $t7, $t6, 0xFFFC
+    sb      $t2, 0x0024($sp)
+    or      $t8, $t5, $t7
+    sw      $ra, 0x0014($sp)
+    sw      $a2, 0x0030($sp)
+    sb      $t8, 0x0024($sp)
+    blez    $t3, .L8032AD68
+    sw      $0, 0x0020($sp)
+.L8032AD38:
+    lw      $t0, 0x0030($sp)
+    lw      $t9, 0x0020($sp)
+    addu    $t1, $t0, $t9
+    lbu     $t4, 0x0000($t1)
+    addu    $t2, $sp, $t9
+    sb      $t4, 0x0025($t2)
+    lw      $t6, 0x0020($sp)
+    lw      $t7, 0x002C($sp)
+    addiu   $t5, $t6, 0x0001
+    slt     $at, $t5, $t7
+    bnez    $at, .L8032AD38
+    sw      $t5, 0x0020($sp)
+.L8032AD68:
+    lui     $a0, %hi(__osRdbWriteOK)
+    jal     __osAtomicDec
+    addiu   $a0, %lo(__osRdbWriteOK)
+    bnez    $v0, .L8032AD90
+    nop
+.L8032AD7C:
+    lui     $a0, %hi(__osRdbWriteOK)
+    jal     __osAtomicDec
+    addiu   $a0, %lo(__osRdbWriteOK)
+    beqz    $v0, .L8032AD7C
+    nop
+.L8032AD90:
+    jal     __osDisableInt
+    nop
+    sw      $v0, 0x001C($sp)
+    addiu   $t8, $sp, 0x0024
+    lw      $t3, 0x0000($t8)
+    lui     $t0, %hi(0xC0000000)
+    jal     __osGetCause
+    sw      $t3, %lo(0xC0000000)($t0)
+    andi    $t1, $v0, 0x2000
+    bnez    $t1, .L8032ADD0
+    nop
+.L8032ADBC:
+    jal     __osGetCause
+    nop
+    andi    $t4, $v0, 0x2000
+    beqz    $t4, .L8032ADBC
+    nop
+.L8032ADD0:
+    lui     $t9, %hi(0xC000000C)
+    sw      $0, %lo(0xC000000C)($t9)
+    lui     $t2, %hi(__osRdbWriteOK)
+    lw      $t2, %lo(__osRdbWriteOK)($t2)
+    lui     $at, %hi(__osRdbWriteOK)
+    lw      $a0, 0x001C($sp)
+    addiu   $t6, $t2, 0x0001
+    jal     __osRestoreInt
+    sw      $t6, %lo(__osRdbWriteOK)($at)
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0028
+    jr      $ra
+    nop

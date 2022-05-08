@@ -1,0 +1,21 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* OSMesgQueue *osPiGetCmdQueue(void) */
+.globl osPiGetCmdQueue
+osPiGetCmdQueue:
+    lui     $t6, %hi(__osPiDevMgr+0x00)
+    lw      $t6, %lo(__osPiDevMgr+0x00)($t6)
+    bnez    $t6, .L80329138
+    nop
+    jr      $ra
+    move    $v0, $0
+.L80329138:
+    lui     $v0, %hi(__osPiDevMgr+0x08)
+    lw      $v0, %lo(__osPiDevMgr+0x08)($v0)
+    jr      $ra
+    nop

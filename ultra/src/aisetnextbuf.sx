@@ -1,0 +1,57 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* s32 osAiSetNextBuffer(void *vaddr, u32 nbytes) */
+.globl osAiSetNextBuffer
+osAiSetNextBuffer:
+    addiu   $sp, $sp, -0x0020
+    lui     $t7, %hi(hdwrBugFlag)
+    lbu     $t7, %lo(hdwrBugFlag)($t7)
+    sw      $a0, 0x0020($sp)
+    lw      $t6, 0x0020($sp)
+    sw      $ra, 0x0014($sp)
+    sw      $a1, 0x0024($sp)
+    beqz    $t7, .L80325DDC
+    sw      $t6, 0x001C($sp)
+    addiu   $t8, $t6, -0x2000
+    sw      $t8, 0x001C($sp)
+.L80325DDC:
+    lw      $t9, 0x0020($sp)
+    lw      $t0, 0x0024($sp)
+    li      $at, 0x2000
+    addu    $t1, $t9, $t0
+    andi    $t2, $t1, 0x3FFF
+    bne     $t2, $at, .L80325E08
+    nop
+    li      $t3, 0x0001
+    lui     $at, %hi(hdwrBugFlag)
+    b       .L80325E10
+    sb      $t3, %lo(hdwrBugFlag)($at)
+.L80325E08:
+    lui     $at, %hi(hdwrBugFlag)
+    sb      $0, %lo(hdwrBugFlag)($at)
+.L80325E10:
+    jal     __osAiDeviceBusy
+    nop
+    beqz    $v0, .L80325E28
+    nop
+    b       .L80325E48
+    li      $v0, -0x0001
+.L80325E28:
+    jal     osVirtualToPhysical
+    lw      $a0, 0x001C($sp)
+    lui     $t4, %hi(0xA4500000)
+    sw      $v0, %lo(0xA4500000)($t4)
+    lw      $t5, 0x0024($sp)
+    lui     $t7, %hi(0xA4500004)
+    move    $v0, $0
+    sw      $t5, %lo(0xA4500004)($t7)
+.L80325E48:
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0020
+    jr      $ra
+    nop

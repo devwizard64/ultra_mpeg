@@ -1,0 +1,326 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+u32_to_string:
+    srl     $t6, $a0, 24
+    srl     $t8, $a0, 16
+    srl     $t0, $a0, 8
+    andi    $t7, $t6, 0x00FF
+    andi    $t9, $t8, 0x00FF
+    andi    $t1, $t0, 0x00FF
+    andi    $t2, $a0, 0x00FF
+    sb      $t7, 0x0000($a1)
+    sb      $t9, 0x0001($a1)
+    sb      $t1, 0x0002($a1)
+    jr      $ra
+    sb      $t2, 0x0003($a1)
+
+string_to_u32:
+    lbu     $t6, 0x0000($a0)
+    addiu   $sp, $sp, -0x0008
+    andi    $t7, $t6, 0x00FF
+    sll     $t8, $t7, 24
+    sw      $t8, 0x0004($sp)
+    lbu     $t9, 0x0001($a0)
+    andi    $t0, $t9, 0x00FF
+    sll     $t1, $t0, 16
+    or      $t2, $t8, $t1
+    sw      $t2, 0x0004($sp)
+    lbu     $t3, 0x0002($a0)
+    andi    $t4, $t3, 0x00FF
+    sll     $t5, $t4, 8
+    or      $t6, $t2, $t5
+    sw      $t6, 0x0004($sp)
+    lbu     $t7, 0x0003($a0)
+    andi    $t9, $t7, 0x00FF
+    or      $t0, $t6, $t9
+    sw      $t0, 0x0004($sp)
+    addiu   $sp, $sp, 0x0008
+    jr      $ra
+    move    $v0, $t0
+
+send_packet:
+    addiu   $sp, $sp, -0x0020
+    lbu     $t6, 0x001C($sp)
+    sw      $a1, 0x0024($sp)
+    lw      $t9, 0x0024($sp)
+    andi    $t7, $t6, 0xFF3F
+    ori     $t8, $t7, 0x0080
+    andi    $t2, $t8, 0x00FF
+    andi    $t0, $t9, 0x0003
+    andi    $t1, $t0, 0x0003
+    andi    $t3, $t2, 0xFFFC
+    sb      $t8, 0x001C($sp)
+    or      $t4, $t1, $t3
+    sw      $ra, 0x0014($sp)
+    sw      $a0, 0x0020($sp)
+    sb      $t4, 0x001C($sp)
+    blez    $t9, .L8032A95C
+    sw      $0, 0x0018($sp)
+.L8032A92C:
+    lw      $t5, 0x0020($sp)
+    lw      $t6, 0x0018($sp)
+    addu    $t7, $t5, $t6
+    lbu     $t0, 0x0000($t7)
+    addu    $t8, $sp, $t6
+    sb      $t0, 0x001D($t8)
+    lw      $t2, 0x0018($sp)
+    lw      $t3, 0x0024($sp)
+    addiu   $t1, $t2, 0x0001
+    slt     $at, $t1, $t3
+    bnez    $at, .L8032A92C
+    sw      $t1, 0x0018($sp)
+.L8032A95C:
+    addiu   $t4, $sp, 0x001C
+    lw      $t9, 0x0000($t4)
+    lui     $t5, %hi(0xC0000000)
+    jal     __osGetCause
+    sw      $t9, %lo(0xC0000000)($t5)
+    andi    $t7, $v0, 0x2000
+    bnez    $t7, .L8032A990
+    nop
+.L8032A97C:
+    jal     __osGetCause
+    nop
+    andi    $t0, $v0, 0x2000
+    beqz    $t0, .L8032A97C
+    nop
+.L8032A990:
+    lui     $t6, %hi(0xC000000C)
+    sw      $0, %lo(0xC000000C)($t6)
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0020
+    jr      $ra
+    nop
+
+send:
+    lui     $t6, %hi(__osRdbWriteOK)
+    lw      $t6, %lo(__osRdbWriteOK)($t6)
+    addiu   $sp, $sp, -0x0028
+    sw      $ra, 0x0014($sp)
+    sw      $a0, 0x0028($sp)
+    bnez    $t6, .L8032AA00
+    sw      $a1, 0x002C($sp)
+    jal     __osGetCause
+    nop
+    andi    $t7, $v0, 0x2000
+    bnez    $t7, .L8032A9EC
+    nop
+.L8032A9D8:
+    jal     __osGetCause
+    nop
+    andi    $t8, $v0, 0x2000
+    beqz    $t8, .L8032A9D8
+    nop
+.L8032A9EC:
+    lui     $t9, %hi(0xC000000C)
+    sw      $0, %lo(0xC000000C)($t9)
+    li      $t0, 0x0001
+    lui     $at, %hi(__osRdbWriteOK)
+    sw      $t0, %lo(__osRdbWriteOK)($at)
+.L8032AA00:
+    lw      $t1, 0x002C($sp)
+    li      $at, 0x0003
+    sw      $0, 0x0024($sp)
+    div     $0, $t1, $at
+    mfhi    $t2
+    subu    $t3, $t1, $t2
+    sw      $t2, 0x001C($sp)
+    blez    $t3, .L8032AA50
+    sw      $t3, 0x0020($sp)
+.L8032AA24:
+    lw      $t4, 0x0028($sp)
+    lw      $t5, 0x0024($sp)
+    li      $a1, 0x0003
+    jal     send_packet
+    addu    $a0, $t4, $t5
+    lw      $t6, 0x0024($sp)
+    lw      $t8, 0x0020($sp)
+    addiu   $t7, $t6, 0x0003
+    slt     $at, $t7, $t8
+    bnez    $at, .L8032AA24
+    sw      $t7, 0x0024($sp)
+.L8032AA50:
+    lw      $t9, 0x001C($sp)
+    blez    $t9, .L8032AA70
+    nop
+    lw      $t0, 0x0028($sp)
+    lw      $t1, 0x0020($sp)
+    move    $a1, $t9
+    jal     send_packet
+    addu    $a0, $t0, $t1
+.L8032AA70:
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0028
+    jr      $ra
+    nop
+
+process_command_memory:
+    addiu   $sp, $sp, -0x0020
+    lui     $a0, %hi(kdebugserver__buffer)
+    sw      $ra, 0x0014($sp)
+    addiu   $a0, %lo(kdebugserver__buffer)
+    jal     string_to_u32
+    addiu   $a0, $a0, 0x0001
+    lui     $a0, %hi(kdebugserver__buffer)
+    addiu   $a0, %lo(kdebugserver__buffer)
+    sw      $v0, 0x001C($sp)
+    jal     string_to_u32
+    addiu   $a0, $a0, 0x0005
+    sw      $v0, 0x0018($sp)
+    lw      $a1, 0x0018($sp)
+    jal     send
+    lw      $a0, 0x001C($sp)
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0020
+    jr      $ra
+    nop
+
+process_command_register:
+    addiu   $sp, $sp, -0x0018
+    lui     $a0, %hi(__osThreadSave)
+    sw      $ra, 0x0014($sp)
+    addiu   $a0, %lo(__osThreadSave)
+    addiu   $a0, $a0, 0x0020
+    jal     send
+    li      $a1, 0x0190
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0018
+    jr      $ra
+    nop
+
+.globl kdebugserver
+kdebugserver:
+    addiu   $sp, $sp, -0x0030
+    sw      $a0, 0x0030($sp)
+    lw      $t6, 0x0030($sp)
+    sw      $ra, 0x001C($sp)
+    sw      $s0, 0x0018($sp)
+    addiu   $t7, $sp, 0x0028
+    sw      $t6, 0x0000($t7)
+    lbu     $t8, 0x0028($sp)
+    sw      $0, 0x002C($sp)
+    andi    $t9, $t8, 0x0003
+    beqz    $t9, .L8032AB78
+    nop
+.L8032AB28:
+    lw      $t0, 0x002C($sp)
+    lui     $t2, %hi(numChars)
+    lw      $t2, %lo(numChars)($t2)
+    addu    $t1, $sp, $t0
+    lbu     $t1, 0x0029($t1)
+    lui     $t3, %hi(numChars)
+    lw      $t3, %lo(numChars)($t3)
+    lui     $at, %hi(kdebugserver__buffer)
+    lw      $t5, 0x002C($sp)
+    lbu     $t7, 0x0028($sp)
+    addu    $at, $at, $t2
+    sb      $t1, %lo(kdebugserver__buffer)($at)
+    lui     $at, %hi(numChars)
+    addiu   $t4, $t3, 0x0001
+    sw      $t4, %lo(numChars)($at)
+    addiu   $t6, $t5, 0x0001
+    andi    $t8, $t7, 0x0003
+    sltu    $at, $t6, $t8
+    bnez    $at, .L8032AB28
+    sw      $t6, 0x002C($sp)
+.L8032AB78:
+    lbu     $t0, 0x0028($sp)
+    lui     $t9, %hi(numCharsToReceive)
+    lw      $t9, %lo(numCharsToReceive)($t9)
+    lui     $s0, %hi(debug_state)
+    lw      $s0, %lo(debug_state)($s0)
+    andi    $t1, $t0, 0x0003
+    lui     $at, %hi(numCharsToReceive)
+    subu    $t2, $t9, $t1
+    beqz    $s0, .L8032ABB4
+    sw      $t2, %lo(numCharsToReceive)($at)
+    li      $at, 0x0001
+    beq     $s0, $at, .L8032AC40
+    nop
+    b       .L8032ACA8
+    nop
+.L8032ABB4:
+    addiu   $t3, $sp, 0x0028
+    lbu     $s0, 0x0001($t3)
+    li      $at, 0x0001
+    beq     $s0, $at, .L8032ABD8
+    li      $at, 0x0002
+    beq     $s0, $at, .L8032AC00
+    nop
+    b       .L8032AC24
+    nop
+.L8032ABD8:
+    lbu     $t5, 0x0028($sp)
+    li      $t4, 0x0001
+    lui     $at, %hi(debug_state)
+    sw      $t4, %lo(debug_state)($at)
+    li      $t6, 0x0009
+    andi    $t7, $t5, 0x0003
+    subu    $t8, $t6, $t7
+    lui     $at, %hi(numCharsToReceive)
+    b       .L8032ACC0
+    sw      $t8, %lo(numCharsToReceive)($at)
+.L8032AC00:
+    jal     process_command_register
+    nop
+    lui     $at, %hi(debug_state)
+    sw      $0, %lo(debug_state)($at)
+    lui     $at, %hi(numChars)
+    sw      $0, %lo(numChars)($at)
+    lui     $at, %hi(numCharsToReceive)
+    b       .L8032ACC0
+    sw      $0, %lo(numCharsToReceive)($at)
+.L8032AC24:
+    lui     $at, %hi(debug_state)
+    sw      $0, %lo(debug_state)($at)
+    lui     $at, %hi(numChars)
+    sw      $0, %lo(numChars)($at)
+    lui     $at, %hi(numCharsToReceive)
+    b       .L8032ACC0
+    sw      $0, %lo(numCharsToReceive)($at)
+.L8032AC40:
+    lui     $t0, %hi(numCharsToReceive)
+    lw      $t0, %lo(numCharsToReceive)($t0)
+    bgtz    $t0, .L8032ACC0
+    nop
+    lui     $t9, %hi(kdebugserver__buffer)
+    addiu   $t9, %lo(kdebugserver__buffer)
+    lbu     $t1, 0x0000($t9)
+    li      $at, 0x0001
+    bne     $t1, $at, .L8032AC8C
+    nop
+    jal     process_command_memory
+    nop
+    lui     $at, %hi(debug_state)
+    sw      $0, %lo(debug_state)($at)
+    lui     $at, %hi(numChars)
+    sw      $0, %lo(numChars)($at)
+    lui     $at, %hi(numCharsToReceive)
+    b       .L8032ACC0
+    sw      $0, %lo(numCharsToReceive)($at)
+.L8032AC8C:
+    lui     $at, %hi(debug_state)
+    sw      $0, %lo(debug_state)($at)
+    lui     $at, %hi(numChars)
+    sw      $0, %lo(numChars)($at)
+    lui     $at, %hi(numCharsToReceive)
+    b       .L8032ACC0
+    sw      $0, %lo(numCharsToReceive)($at)
+.L8032ACA8:
+    lui     $at, %hi(debug_state)
+    sw      $0, %lo(debug_state)($at)
+    lui     $at, %hi(numChars)
+    sw      $0, %lo(numChars)($at)
+    lui     $at, %hi(numCharsToReceive)
+    sw      $0, %lo(numCharsToReceive)($at)
+.L8032ACC0:
+    lw      $ra, 0x001C($sp)
+    lw      $s0, 0x0018($sp)
+    addiu   $sp, $sp, 0x0030
+    jr      $ra
+    nop

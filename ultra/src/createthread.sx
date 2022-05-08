@@ -1,0 +1,98 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void osCreateThread(
+    OSThread *t,
+    OSId id,
+    void (*entry)(void *),
+    void *arg,
+    void *sp,
+    OSPri pri
+) */
+.globl osCreateThread
+osCreateThread:
+    addiu   $sp, $sp, -0x0028
+    sw      $a0, 0x0028($sp)
+    sw      $a1, 0x002C($sp)
+    lw      $t6, 0x002C($sp)
+    lw      $t7, 0x0028($sp)
+    sw      $ra, 0x001C($sp)
+    sw      $a2, 0x0030($sp)
+    sw      $a3, 0x0034($sp)
+    sw      $s0, 0x0018($sp)
+    sw      $t6, 0x0014($t7)
+    lw      $t9, 0x0028($sp)
+    lw      $t8, 0x003C($sp)
+    sw      $t8, 0x0004($t9)
+    lw      $t0, 0x0028($sp)
+    sw      $0, 0x0000($t0)
+    lw      $t1, 0x0028($sp)
+    sw      $0, 0x0008($t1)
+    lw      $t3, 0x0028($sp)
+    lw      $t2, 0x0030($sp)
+    sw      $t2, 0x011C($t3)
+    lw      $t4, 0x0034($sp)
+    lw      $t5, 0x0028($sp)
+    move    $t7, $t4
+    sra     $t6, $t4, 31
+    sw      $t6, 0x0038($t5)
+    sw      $t7, 0x003C($t5)
+    lw      $t8, 0x0038($sp)
+    lw      $t9, 0x0028($sp)
+    lui     $t4, %hi(__osCleanupThread)
+    move    $t1, $t8
+    sltiu   $at, $t1, 0x0010
+    sra     $t0, $t8, 31
+    subu    $t2, $t0, $at
+    addiu   $t3, $t1, -0x0010
+    sw      $t3, 0x00F4($t9)
+    sw      $t2, 0x00F0($t9)
+    lw      $t5, 0x0028($sp)
+    addiu   $t4, %lo(__osCleanupThread)
+    move    $t7, $t4
+    sra     $t6, $t4, 31
+    sw      $t6, 0x0100($t5)
+    sw      $t7, 0x0104($t5)
+    lw      $t1, 0x0028($sp)
+    lui     $t8, 0x003FFF01 >> 16
+    ori     $t8, 0x003FFF01 & 0xFFFF
+    sw      $t8, 0x0020($sp)
+    li      $t0, 0xFF03
+    sw      $t0, 0x0118($t1)
+    lw      $t2, 0x0020($sp)
+    lw      $t4, 0x0028($sp)
+    li      $at, 0x003F0000
+    and     $t3, $t2, $at
+    srl     $t9, $t3, 16
+    sw      $t9, 0x0128($t4)
+    lw      $t7, 0x0028($sp)
+    lui     $t6, 0x01000800 >> 16
+    ori     $t6, 0x01000800 & 0xFFFF
+    sw      $t6, 0x012C($t7)
+    lw      $t5, 0x0028($sp)
+    li      $t8, 0x0001
+    sw      $0, 0x0018($t5)
+    lw      $t0, 0x0028($sp)
+    sh      $t8, 0x0010($t0)
+    lw      $t1, 0x0028($sp)
+    jal     __osDisableInt
+    sh      $0, 0x0012($t1)
+    lui     $t2, %hi(__osActiveQueue)
+    lw      $t2, %lo(__osActiveQueue)($t2)
+    lw      $t3, 0x0028($sp)
+    move    $s0, $v0
+    lui     $at, %hi(__osActiveQueue)
+    sw      $t2, 0x000C($t3)
+    lw      $t9, 0x0028($sp)
+    move    $a0, $s0
+    jal     __osRestoreInt
+    sw      $t9, %lo(__osActiveQueue)($at)
+    lw      $ra, 0x001C($sp)
+    lw      $s0, 0x0018($sp)
+    addiu   $sp, $sp, 0x0028
+    jr      $ra
+    nop

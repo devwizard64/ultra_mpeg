@@ -1,0 +1,18 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void osSpTaskYield(void) */
+.globl osSpTaskYield
+osSpTaskYield:
+    addiu   $sp, $sp, -0x0018
+    sw      $ra, 0x0014($sp)
+    jal     __osSpSetStatus
+    li      $a0, 0x0400
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0018
+    jr      $ra
+    nop

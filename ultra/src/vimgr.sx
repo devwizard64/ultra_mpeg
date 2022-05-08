@@ -1,0 +1,234 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void osCreateViManager(OSPri pri) */
+.globl osCreateViManager
+osCreateViManager:
+    lui     $t6, %hi(__osViDevMgr+0x00)
+    lw      $t6, %lo(__osViDevMgr+0x00)($t6)
+    addiu   $sp, $sp, -0x0030
+    sw      $ra, 0x001C($sp)
+    bnez    $t6, .L803230E4
+    sw      $a0, 0x0030($sp)
+    jal     __osTimerServicesInit
+    nop
+    lui     $a0, %hi(viEventQueue)
+    lui     $a1, %hi(viEventBuf)
+    addiu   $a1, %lo(viEventBuf)
+    addiu   $a0, %lo(viEventQueue)
+    jal     osCreateMesgQueue
+    li      $a2, 0x0005
+    lui     $at, %hi(viRetraceMsg+4)
+    li      $t7, 0x000D
+    sh      $t7, %lo(viRetraceMsg+0)($at)
+    sb      $0, %lo(viRetraceMsg+2)($at)
+    sw      $0, %lo(viRetraceMsg+4)($at)
+    lui     $at, %hi(viCounterMsg+4)
+    li      $t8, 0x000E
+    lui     $a1, %hi(viEventQueue)
+    lui     $a2, %hi(viRetraceMsg+0)
+    sh      $t8, %lo(viCounterMsg+0)($at)
+    sb      $0, %lo(viCounterMsg+2)($at)
+    sw      $0, %lo(viCounterMsg+4)($at)
+    addiu   $a2, %lo(viRetraceMsg+0)
+    addiu   $a1, %lo(viEventQueue)
+    jal     osSetEventMesg
+    li      $a0, 0x0007
+    lui     $a1, %hi(viEventQueue)
+    lui     $a2, %hi(viCounterMsg+0)
+    addiu   $a2, %lo(viCounterMsg+0)
+    addiu   $a1, %lo(viEventQueue)
+    jal     osSetEventMesg
+    li      $a0, 0x0003
+    li      $t9, -0x0001
+    sw      $t9, 0x0028($sp)
+    jal     osGetThreadPri
+    move    $a0, $0
+    sw      $v0, 0x0024($sp)
+    lw      $t0, 0x0024($sp)
+    lw      $t1, 0x0030($sp)
+    slt     $at, $t0, $t1
+    beqz    $at, .L80323038
+    nop
+    sw      $t0, 0x0028($sp)
+    move    $a0, $0
+    jal     osSetThreadPri
+    move    $a1, $t1
+.L80323038:
+    jal     __osDisableInt
+    nop
+    lui     $at, %hi(__osViDevMgr+0x0C)
+    lui     $t4, %hi(viEventQueue)
+    lui     $t3, %hi(viThread)
+    addiu   $t4, %lo(viEventQueue)
+    li      $t2, 0x0001
+    addiu   $t3, %lo(viThread)
+    lui     $t5, %hi(viThreadStack)
+    lw      $t7, 0x0030($sp)
+    sw      $t2, %lo(__osViDevMgr+0x00)($at)
+    sw      $t3, %lo(__osViDevMgr+0x04)($at)
+    sw      $t4, %lo(__osViDevMgr+0x08)($at)
+    sw      $t4, %lo(__osViDevMgr+0x0C)($at)
+    addiu   $t5, %lo(viThreadStack)
+    lui     $at, %hi(__osViDevMgr+0x14)
+    addiu   $t6, $t5, 0x1000
+    lui     $a2, %hi(viMgrMain)
+    lui     $a3, %hi(__osViDevMgr+0x00)
+    sw      $v0, 0x002C($sp)
+    sw      $0, %lo(__osViDevMgr+0x10)($at)
+    sw      $0, %lo(__osViDevMgr+0x14)($at)
+    addiu   $a3, %lo(__osViDevMgr+0x00)
+    addiu   $a2, %lo(viMgrMain)
+    sw      $t6, 0x0010($sp)
+    move    $a0, $t3
+    move    $a1, $0
+    jal     osCreateThread
+    sw      $t7, 0x0014($sp)
+    jal     __osViInit
+    nop
+    lui     $a0, %hi(viThread)
+    jal     osStartThread
+    addiu   $a0, %lo(viThread)
+    jal     __osRestoreInt
+    lw      $a0, 0x002C($sp)
+    lw      $t8, 0x0028($sp)
+    li      $at, -0x0001
+    beq     $t8, $at, .L803230E4
+    nop
+    move    $a0, $0
+    jal     osSetThreadPri
+    move    $a1, $t8
+.L803230E4:
+    lw      $ra, 0x001C($sp)
+    addiu   $sp, $sp, 0x0030
+    jr      $ra
+    nop
+
+viMgrMain:
+    addiu   $sp, $sp, -0x0038
+    sw      $ra, 0x001C($sp)
+    sw      $a0, 0x0038($sp)
+    sw      $s0, 0x0018($sp)
+    sw      $0, 0x002C($sp)
+    jal     __osViGetCurrentContext
+    sw      $0, 0x0028($sp)
+    sw      $v0, 0x0034($sp)
+    lw      $t6, 0x0034($sp)
+    lui     $at, %hi(viMgrMain__retrace)
+    lhu     $t7, 0x0002($t6)
+    bnez    $t7, .L80323134
+    sh      $t7, %lo(viMgrMain__retrace)($at)
+    li      $t8, 0x0001
+    lui     $at, %hi(viMgrMain__retrace)
+    sh      $t8, %lo(viMgrMain__retrace)($at)
+.L80323134:
+    lw      $t9, 0x0038($sp)
+    sw      $t9, 0x0030($sp)
+.L8032313C:
+    lw      $t0, 0x0030($sp)
+    addiu   $a1, $sp, 0x002C
+    li      $a2, 0x0001
+    jal     osRecvMesg
+    lw      $a0, 0x000C($t0)
+    lw      $t1, 0x002C($sp)
+    li      $at, 0x000D
+    lhu     $s0, 0x0000($t1)
+    beq     $s0, $at, .L80323174
+    li      $at, 0x000E
+    beq     $s0, $at, .L80323284
+    nop
+    b       .L8032313C
+    nop
+.L80323174:
+    jal     __osViSwapContext
+    nop
+    lui     $t2, %hi(viMgrMain__retrace)
+    lhu     $t2, %lo(viMgrMain__retrace)($t2)
+    lui     $at, %hi(viMgrMain__retrace)
+    addiu   $t3, $t2, -0x0001
+    andi    $t4, $t3, 0xFFFF
+    bnez    $t4, .L803231D4
+    sh      $t3, %lo(viMgrMain__retrace)($at)
+    jal     __osViGetCurrentContext
+    nop
+    sw      $v0, 0x0034($sp)
+    lw      $t5, 0x0034($sp)
+    lw      $t6, 0x0010($t5)
+    beqz    $t6, .L803231C4
+    nop
+    move    $a0, $t6
+    lw      $a1, 0x0014($t5)
+    jal     osSendMesg
+    move    $a2, $0
+.L803231C4:
+    lw      $t7, 0x0034($sp)
+    lui     $at, %hi(viMgrMain__retrace)
+    lhu     $t8, 0x0002($t7)
+    sh      $t8, %lo(viMgrMain__retrace)($at)
+.L803231D4:
+    lui     $t9, %hi(__osViIntrCount)
+    lw      $t9, %lo(__osViIntrCount)($t9)
+    lw      $t1, 0x0028($sp)
+    lui     $at, %hi(__osViIntrCount)
+    addiu   $t0, $t9, 0x0001
+    beqz    $t1, .L8032321C
+    sw      $t0, %lo(__osViIntrCount)($at)
+    jal     osGetCount
+    nop
+    sw      $v0, 0x0024($sp)
+    lw      $t2, 0x0024($sp)
+    li      $t4, 0x0000
+    lui     $at, %hi(__osCurrentTime+0)
+    sw      $t4, %lo(__osCurrentTime+0)($at)
+    lui     $at, %hi(__osCurrentTime+4)
+    move    $t5, $t2
+    sw      $t5, %lo(__osCurrentTime+4)($at)
+    sw      $0, 0x0028($sp)
+.L8032321C:
+    lui     $t3, %hi(__osBaseCounter)
+    lw      $t3, %lo(__osBaseCounter)($t3)
+    jal     osGetCount
+    sw      $t3, 0x0024($sp)
+    lui     $at, %hi(__osBaseCounter)
+    sw      $v0, %lo(__osBaseCounter)($at)
+    lui     $t6, %hi(__osBaseCounter)
+    lw      $t6, %lo(__osBaseCounter)($t6)
+    lw      $t7, 0x0024($sp)
+    lui     $t3, %hi(__osCurrentTime+4)
+    lw      $t3, %lo(__osCurrentTime+4)($t3)
+    subu    $t8, $t6, $t7
+    move    $t1, $t8
+    lui     $t2, %hi(__osCurrentTime+0)
+    addu    $t5, $t1, $t3
+    lw      $t2, %lo(__osCurrentTime+0)($t2)
+    li      $t0, 0x0000
+    sltu    $at, $t5, $t3
+    addu    $t4, $at, $t0
+    lui     $at, %hi(__osCurrentTime+0)
+    addu    $t4, $t4, $t2
+    sw      $t4, %lo(__osCurrentTime+0)($at)
+    lui     $at, %hi(__osCurrentTime+4)
+    sw      $t8, 0x0024($sp)
+    b       .L8032313C
+    sw      $t5, %lo(__osCurrentTime+4)($at)
+.L80323284:
+    jal     __osTimerInterrupt
+    nop
+    b       .L8032313C
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    lw      $ra, 0x001C($sp)
+    lw      $s0, 0x0018($sp)
+    addiu   $sp, $sp, 0x0038
+    jr      $ra
+    nop

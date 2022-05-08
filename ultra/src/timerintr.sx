@@ -1,0 +1,284 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+.globl __osTimerServicesInit
+__osTimerServicesInit:
+    lui     $at, %hi(__osCurrentTime+0)
+    li      $t6, 0x0000
+    li      $t7, 0x0000
+    sw      $t7, %lo(__osCurrentTime+4)($at)
+    sw      $t6, %lo(__osCurrentTime+0)($at)
+    lui     $at, %hi(__osBaseCounter)
+    lui     $t8, %hi(__osTimerList)
+    lw      $t8, %lo(__osTimerList)($t8)
+    sw      $0, %lo(__osBaseCounter)($at)
+    lui     $at, %hi(__osViIntrCount)
+    sw      $0, %lo(__osViIntrCount)($at)
+    lui     $t9, %hi(__osTimerList)
+    sw      $t8, 0x0004($t8)
+    lw      $t9, %lo(__osTimerList)($t9)
+    lui     $t1, %hi(__osTimerList)
+    li      $t2, 0x0000
+    lw      $t0, 0x0004($t9)
+    li      $t3, 0x0000
+    lui     $t4, %hi(__osTimerList)
+    sw      $t0, 0x0000($t9)
+    lw      $t1, %lo(__osTimerList)($t1)
+    lui     $t5, %hi(__osTimerList)
+    lui     $t8, %hi(__osTimerList)
+    sw      $t2, 0x0010($t1)
+    sw      $t3, 0x0014($t1)
+    lw      $t4, %lo(__osTimerList)($t4)
+    lw      $t6, 0x0010($t4)
+    lw      $t7, 0x0014($t4)
+    sw      $t6, 0x0008($t4)
+    sw      $t7, 0x000C($t4)
+    lw      $t5, %lo(__osTimerList)($t5)
+    sw      $0, 0x0018($t5)
+    lw      $t8, %lo(__osTimerList)($t8)
+    jr      $ra
+    sw      $0, 0x001C($t8)
+
+.globl __osTimerInterrupt
+__osTimerInterrupt:
+    lui     $t6, %hi(__osTimerList)
+    lw      $t6, %lo(__osTimerList)($t6)
+    addiu   $sp, $sp, -0x0028
+    sw      $ra, 0x0014($sp)
+    lw      $t7, 0x0000($t6)
+    beq     $t7, $t6, .L80326054
+    nop
+.L80325F08:
+    lui     $t8, %hi(__osTimerList)
+    lw      $t8, %lo(__osTimerList)($t8)
+    lw      $t9, 0x0000($t8)
+    bne     $t9, $t8, .L80325F30
+    sw      $t9, 0x0024($sp)
+    jal     __osSetCompare
+    move    $a0, $0
+    lui     $at, %hi(__osTimerCounter)
+    b       .L80326054
+    sw      $0, %lo(__osTimerCounter)($at)
+.L80325F30:
+    jal     osGetCount
+    nop
+    sw      $v0, 0x0020($sp)
+    lui     $t1, %hi(__osTimerCounter)
+    lw      $t1, %lo(__osTimerCounter)($t1)
+    lw      $t0, 0x0020($sp)
+    lw      $t7, 0x0024($sp)
+    lui     $at, %hi(__osTimerCounter)
+    subu    $t2, $t0, $t1
+    sw      $t2, 0x001C($sp)
+    sw      $t0, %lo(__osTimerCounter)($at)
+    lw      $t6, 0x0010($t7)
+    lw      $t3, 0x001C($sp)
+    li      $t4, 0x0000
+    move    $t9, $t7
+    sltu    $at, $t6, $t4
+    lw      $t7, 0x0014($t7)
+    bnez    $at, .L80325FD0
+    move    $t5, $t3
+    sltu    $at, $t4, $t6
+    bnez    $at, .L80325F90
+    sltu    $at, $t5, $t7
+    beqz    $at, .L80325FD0
+    nop
+.L80325F90:
+    addiu   $t8, $t9, 0x0010
+    sw      $t8, 0x0018($sp)
+    lw      $t3, 0x0014($t9)
+    lw      $t2, 0x0010($t9)
+    sltu    $at, $t3, $t5
+    subu    $t0, $t2, $t4
+    subu    $t0, $t0, $at
+    subu    $t1, $t3, $t5
+    sw      $t1, 0x0014($t9)
+    sw      $t0, 0x0010($t9)
+    lw      $t6, 0x0024($sp)
+    lw      $a0, 0x0010($t6)
+    jal     __osSetTimerIntr
+    lw      $a1, 0x0014($t6)
+    b       .L80326054
+    nop
+.L80325FD0:
+    lw      $t7, 0x0024($sp)
+    lw      $t8, 0x0000($t7)
+    lw      $t2, 0x0004($t7)
+    sw      $t8, 0x0000($t2)
+    lw      $t3, 0x0024($sp)
+    lw      $t4, 0x0004($t3)
+    lw      $t5, 0x0000($t3)
+    sw      $t4, 0x0004($t5)
+    lw      $t0, 0x0024($sp)
+    sw      $0, 0x0000($t0)
+    lw      $t1, 0x0024($sp)
+    sw      $0, 0x0004($t1)
+    lw      $t9, 0x0024($sp)
+    lw      $t6, 0x0018($t9)
+    beqz    $t6, .L80326020
+    nop
+    move    $a0, $t6
+    lw      $a1, 0x001C($t9)
+    jal     osSendMesg
+    move    $a2, $0
+.L80326020:
+    lw      $t7, 0x0024($sp)
+    lw      $t8, 0x0008($t7)
+    lw      $t9, 0x000C($t7)
+    bnez    $t8, .L8032603C
+    nop
+    beqz    $t9, .L80325F08
+    nop
+.L8032603C:
+    sw      $t8, 0x0010($t7)
+    sw      $t9, 0x0014($t7)
+    jal     __osInsertTimer
+    lw      $a0, 0x0024($sp)
+    b       .L80325F08
+    nop
+.L80326054:
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0028
+    jr      $ra
+    nop
+
+.globl __osSetTimerIntr
+__osSetTimerIntr:
+    addiu   $sp, $sp, -0x0028
+    sw      $ra, 0x0014($sp)
+    sw      $a0, 0x0028($sp)
+    jal     __osDisableInt
+    sw      $a1, 0x002C($sp)
+    jal     osGetCount
+    sw      $v0, 0x001C($sp)
+    lui     $at, %hi(__osTimerCounter)
+    sw      $v0, %lo(__osTimerCounter)($at)
+    lui     $t6, %hi(__osTimerCounter)
+    lw      $t6, %lo(__osTimerCounter)($t6)
+    lw      $t1, 0x002C($sp)
+    lw      $t0, 0x0028($sp)
+    move    $t9, $t6
+    addu    $t3, $t9, $t1
+    li      $t8, 0x0000
+    sltu    $at, $t3, $t1
+    addu    $t2, $at, $t8
+    addu    $t2, $t2, $t0
+    sw      $t2, 0x0020($sp)
+    sw      $t3, 0x0024($sp)
+    jal     __osSetCompare
+    move    $a0, $t3
+    jal     __osRestoreInt
+    lw      $a0, 0x001C($sp)
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0028
+    jr      $ra
+    nop
+
+.globl __osInsertTimer
+__osInsertTimer:
+    addiu   $sp, $sp, -0x0038
+    sw      $ra, 0x0014($sp)
+    jal     __osDisableInt
+    sw      $a0, 0x0038($sp)
+    lui     $t6, %hi(__osTimerList)
+    lw      $t6, %lo(__osTimerList)($t6)
+    sw      $v0, 0x0024($sp)
+    lw      $t8, 0x0038($sp)
+    lw      $t7, 0x0000($t6)
+    sw      $t7, 0x0034($sp)
+    lw      $t1, 0x0014($t8)
+    lw      $t0, 0x0010($t8)
+    sw      $t1, 0x002C($sp)
+    beq     $t7, $t6, .L803261B4
+    sw      $t0, 0x0028($sp)
+    lw      $t2, 0x0010($t7)
+    lw      $t3, 0x0014($t7)
+    sltu    $at, $t0, $t2
+    bnez    $at, .L803261B4
+    sltu    $at, $t2, $t0
+    bnez    $at, .L80326138
+    sltu    $at, $t3, $t1
+    beqz    $at, .L803261B4
+    nop
+.L80326138:
+    addiu   $t9, $sp, 0x0028
+    lw      $t8, 0x0034($sp)
+    sw      $t9, 0x0020($sp)
+    lw      $t5, 0x0004($t9)
+    lw      $t4, 0x0000($t9)
+    lw      $t7, 0x0014($t8)
+    lw      $t6, 0x0010($t8)
+    lui     $t8, %hi(__osTimerList)
+    sltu    $at, $t5, $t7
+    subu    $t0, $t4, $t6
+    subu    $t0, $t0, $at
+    subu    $t1, $t5, $t7
+    sw      $t1, 0x0004($t9)
+    sw      $t0, 0x0000($t9)
+    lw      $t2, 0x0034($sp)
+    lw      $t8, %lo(__osTimerList)($t8)
+    lw      $t3, 0x0000($t2)
+    beq     $t3, $t8, .L803261B4
+    sw      $t3, 0x0034($sp)
+    lw      $t4, 0x0028($sp)
+    lw      $t6, 0x0010($t3)
+    lw      $t5, 0x002C($sp)
+    lw      $t7, 0x0014($t3)
+    sltu    $at, $t6, $t4
+    bnez    $at, .L80326138
+    nop
+    sltu    $at, $t4, $t6
+    bnez    $at, .L803261B4
+    sltu    $at, $t7, $t5
+    bnez    $at, .L80326138
+    nop
+.L803261B4:
+    lw      $t9, 0x0038($sp)
+    lw      $t0, 0x0028($sp)
+    lw      $t1, 0x002C($sp)
+    lui     $t8, %hi(__osTimerList)
+    sw      $t0, 0x0010($t9)
+    sw      $t1, 0x0014($t9)
+    lw      $t8, %lo(__osTimerList)($t8)
+    lw      $t2, 0x0034($sp)
+    beq     $t2, $t8, .L8032620C
+    nop
+    addiu   $t3, $t2, 0x0010
+    sw      $t3, 0x001C($sp)
+    lw      $t5, 0x0014($t2)
+    lw      $t4, 0x0010($t2)
+    lw      $t6, 0x0028($sp)
+    lw      $t7, 0x002C($sp)
+    subu    $t0, $t4, $t6
+    sltu    $at, $t5, $t7
+    subu    $t0, $t0, $at
+    subu    $t1, $t5, $t7
+    sw      $t1, 0x0014($t2)
+    sw      $t0, 0x0010($t2)
+.L8032620C:
+    lw      $t9, 0x0034($sp)
+    lw      $t8, 0x0038($sp)
+    sw      $t9, 0x0000($t8)
+    lw      $t3, 0x0034($sp)
+    lw      $t5, 0x0038($sp)
+    lw      $t4, 0x0004($t3)
+    sw      $t4, 0x0004($t5)
+    lw      $t7, 0x0034($sp)
+    lw      $t6, 0x0038($sp)
+    lw      $t0, 0x0004($t7)
+    sw      $t6, 0x0000($t0)
+    lw      $t2, 0x0034($sp)
+    lw      $t1, 0x0038($sp)
+    sw      $t1, 0x0004($t2)
+    jal     __osRestoreInt
+    lw      $a0, 0x0024($sp)
+    lw      $ra, 0x0014($sp)
+    lw      $v0, 0x0028($sp)
+    lw      $v1, 0x002C($sp)
+    jr      $ra
+    addiu   $sp, $sp, 0x0038

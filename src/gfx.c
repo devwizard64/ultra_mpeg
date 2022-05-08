@@ -5,21 +5,10 @@
  *     LICENSE for more information.                                          *
  ******************************************************************************/
 
-#ifndef __UMPG_H__
-#define __UMPG_H__
-
 #include <ultra64.h>
+#include "gfx.h"
 
-typedef struct umpg UMPG;
-
-extern UMPG *umpg_init(
-    int x, int y, unsigned int w, unsigned int h,
-    const void *start, const void *end
-);
-extern void umpg_free(UMPG *umpg);
-extern int umpg_update(UMPG *umpg, Gfx **gfx);
-extern void umpg_resize(
-    UMPG *umpg, int x, int y, unsigned int w, unsigned int h
-);
-
-#endif /* __UMPG_H__ */
+u16 gfx_cimg[3][SCREEN_HT][SCREEN_WD];
+u64 gfx_fifo[FIFO_LEN];
+u64 gfx_stack[SP_DRAM_STACK_SIZE64];
+Gfx gfx_data[2][GFX_LEN];

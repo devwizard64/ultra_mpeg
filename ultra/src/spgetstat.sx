@@ -1,0 +1,12 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+.globl __osSpGetStatus
+__osSpGetStatus:
+    lui     $t6, %hi(0xA4040010)
+    jr      $ra
+    lw      $v0, %lo(0xA4040010)($t6)

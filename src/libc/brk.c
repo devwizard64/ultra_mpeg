@@ -5,21 +5,20 @@
  *     LICENSE for more information.                                          *
  ******************************************************************************/
 
-#ifndef __UMPG_H__
-#define __UMPG_H__
-
 #include <ultra64.h>
 
-typedef struct umpg UMPG;
+static char *brkp;
 
-extern UMPG *umpg_init(
-    int x, int y, unsigned int w, unsigned int h,
-    const void *start, const void *end
-);
-extern void umpg_free(UMPG *umpg);
-extern int umpg_update(UMPG *umpg, Gfx **gfx);
-extern void umpg_resize(
-    UMPG *umpg, int x, int y, unsigned int w, unsigned int h
-);
+int brk(void *addr)
+{
+    if (addr > (void *)PHYS_TO_K0(osMemSize)) return -1;
+    brkp = addr;
+    return 0;
+}
 
-#endif /* __UMPG_H__ */
+void *sbrk(long increment)
+{
+    void *ptr = brkp;
+    if (brk(brkp+increment) != 0) return (void *)-1;
+    return ptr;
+}

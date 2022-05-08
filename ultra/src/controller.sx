@@ -1,0 +1,268 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* s32 osContInit(OSMesgQueue *mq, u8 *bitpattern, OSContStatus *status) */
+.globl osContInit
+osContInit:
+    addiu   $sp, $sp, -0x0080
+    lui     $t6, %hi(__osContinitialized)
+    lw      $t6, %lo(__osContinitialized)($t6)
+    sw      $ra, 0x0024($sp)
+    sw      $a0, 0x0080($sp)
+    sw      $a1, 0x0084($sp)
+    sw      $a2, 0x0088($sp)
+    beqz    $t6, .L80323CEC
+    sw      $0, 0x0078($sp)
+    b       .L80323EAC
+    move    $v0, $0
+.L80323CEC:
+    li      $t7, 0x0001
+    lui     $at, %hi(__osContinitialized)
+    jal     osGetTime
+    sw      $t7, %lo(__osContinitialized)($at)
+    lui     $a1, 0x0007A120 >> 16
+    lui     $a2, %hi(osClockRate+0)
+    lui     $a3, %hi(osClockRate+4)
+    sw      $v0, 0x0070($sp)
+    sw      $v1, 0x0074($sp)
+    lw      $a3, %lo(osClockRate+4)($a3)
+    lw      $a2, %lo(osClockRate+0)($a2)
+    ori     $a1, 0x0007A120 & 0xFFFF
+    jal     __ll_mul
+    li      $a0, 0x0000
+    sw      $v0, 0x0030($sp)
+    sw      $v1, 0x0034($sp)
+    lui     $a3, 0x000F4240 >> 16
+    ori     $a3, 0x000F4240 & 0xFFFF
+    lw      $a1, 0x0034($sp)
+    lw      $a0, 0x0030($sp)
+    jal     __ull_div
+    li      $a2, 0x0000
+    lw      $t8, 0x0070($sp)
+    lw      $t9, 0x0074($sp)
+    sltu    $at, $v0, $t8
+    bnez    $at, .L80323E18
+    sltu    $at, $t8, $v0
+    bnez    $at, .L80323D68
+    sltu    $at, $t9, $v1
+    beqz    $at, .L80323E18
+    nop
+.L80323D68:
+    addiu   $a0, $sp, 0x0038
+    addiu   $a1, $sp, 0x007C
+    jal     osCreateMesgQueue
+    li      $a2, 0x0001
+    lui     $a1, 0x0007A120 >> 16
+    lui     $a2, %hi(osClockRate+0)
+    lui     $a3, %hi(osClockRate+4)
+    lw      $a3, %lo(osClockRate+4)($a3)
+    lw      $a2, %lo(osClockRate+0)($a2)
+    ori     $a1, 0x0007A120 & 0xFFFF
+    jal     __ll_mul
+    li      $a0, 0x0000
+    sw      $v0, 0x0028($sp)
+    sw      $v1, 0x002C($sp)
+    lui     $a3, 0x000F4240 >> 16
+    ori     $a3, 0x000F4240 & 0xFFFF
+    lw      $a1, 0x002C($sp)
+    lw      $a0, 0x0028($sp)
+    jal     __ull_div
+    li      $a2, 0x0000
+    sw      $v0, 0x0030($sp)
+    sw      $v1, 0x0034($sp)
+    lw      $t1, 0x0034($sp)
+    lw      $t0, 0x0030($sp)
+    lw      $t2, 0x0070($sp)
+    lw      $t3, 0x0074($sp)
+    li      $t4, 0x0000
+    li      $t5, 0x0000
+    addiu   $t6, $sp, 0x0038
+    addiu   $t7, $sp, 0x007C
+    subu    $a2, $t0, $t2
+    sltu    $at, $t1, $t3
+    subu    $a2, $a2, $at
+    sw      $t7, 0x001C($sp)
+    sw      $t6, 0x0018($sp)
+    sw      $t5, 0x0014($sp)
+    sw      $t4, 0x0010($sp)
+    addiu   $a0, $sp, 0x0050
+    jal     osSetTimer
+    subu    $a3, $t1, $t3
+    addiu   $a0, $sp, 0x0038
+    addiu   $a1, $sp, 0x007C
+    jal     osRecvMesg
+    li      $a2, 0x0001
+.L80323E18:
+    li      $t8, 0x0004
+    lui     $at, %hi(__osMaxControllers)
+    sb      $t8, %lo(__osMaxControllers)($at)
+    jal     __osPackRequestData
+    li      $a0, 0x00FF
+    lui     $a1, %hi(__osContPifRam)
+    addiu   $a1, %lo(__osContPifRam)
+    jal     __osSiRawStartDma
+    li      $a0, 0x0001
+    sw      $v0, 0x0078($sp)
+    lw      $a0, 0x0080($sp)
+    addiu   $a1, $sp, 0x007C
+    jal     osRecvMesg
+    li      $a2, 0x0001
+    lui     $a1, %hi(__osContPifRam)
+    addiu   $a1, %lo(__osContPifRam)
+    jal     __osSiRawStartDma
+    move    $a0, $0
+    sw      $v0, 0x0078($sp)
+    lw      $a0, 0x0080($sp)
+    addiu   $a1, $sp, 0x007C
+    jal     osRecvMesg
+    li      $a2, 0x0001
+    lw      $a0, 0x0084($sp)
+    jal     __osContGetInitData
+    lw      $a1, 0x0088($sp)
+    li      $t9, 0x00FF
+    lui     $at, %hi(__osContLastCmd)
+    jal     __osSiCreateAccessQueue
+    sb      $t9, %lo(__osContLastCmd)($at)
+    lui     $a0, %hi(__osEepromTimerQ)
+    lui     $a1, %hi(__osEepromTimerMsg)
+    addiu   $a1, %lo(__osEepromTimerMsg)
+    addiu   $a0, %lo(__osEepromTimerQ)
+    jal     osCreateMesgQueue
+    li      $a2, 0x0001
+    lw      $v0, 0x0078($sp)
+.L80323EAC:
+    lw      $ra, 0x0024($sp)
+    addiu   $sp, $sp, 0x0080
+    jr      $ra
+    nop
+
+/* void __osContGetInitData(u8 *, OSContStatus *) */
+.globl __osContGetInitData
+__osContGetInitData:
+    lui     $t7, %hi(__osMaxControllers)
+    lbu     $t7, %lo(__osMaxControllers)($t7)
+    addiu   $sp, $sp, -0x0018
+    lui     $t6, %hi(__osContPifRam)
+    addiu   $t6, %lo(__osContPifRam)
+    sb      $0, 0x0007($sp)
+    sw      $t6, 0x0014($sp)
+    blez    $t7, .L80323F7C
+    sw      $0, 0x0008($sp)
+.L80323EE0:
+    lw      $t9, 0x0014($sp)
+    addiu   $t8, $sp, 0x000C
+    lwl     $at, 0x0000($t9)
+    lwr     $at, 0x0003($t9)
+    sw      $at, 0x0000($t8)
+    lwl     $t1, 0x0004($t9)
+    lwr     $t1, 0x0007($t9)
+    sw      $t1, 0x0004($t8)
+    lbu     $t2, 0x000E($sp)
+    andi    $t3, $t2, 0x00C0
+    sra     $t4, $t3, 4
+    sb      $t4, 0x0003($a1)
+    lbu     $t5, 0x0003($a1)
+    bnez    $t5, .L80323F50
+    nop
+    lbu     $t6, 0x0011($sp)
+    lbu     $t0, 0x0010($sp)
+    li      $t3, 0x0001
+    sll     $t7, $t6, 8
+    or      $t8, $t7, $t0
+    sh      $t8, 0x0000($a1)
+    lbu     $t9, 0x0012($sp)
+    sb      $t9, 0x0002($a1)
+    lw      $t2, 0x0008($sp)
+    lbu     $t1, 0x0007($sp)
+    sllv    $t4, $t3, $t2
+    or      $t5, $t1, $t4
+    sb      $t5, 0x0007($sp)
+.L80323F50:
+    lw      $t6, 0x0008($sp)
+    lui     $t9, %hi(__osMaxControllers)
+    lbu     $t9, %lo(__osMaxControllers)($t9)
+    lw      $t0, 0x0014($sp)
+    addiu   $t7, $t6, 0x0001
+    slt     $at, $t7, $t9
+    addiu   $t8, $t0, 0x0008
+    sw      $t8, 0x0014($sp)
+    sw      $t7, 0x0008($sp)
+    bnez    $at, .L80323EE0
+    addiu   $a1, $a1, 0x0004
+.L80323F7C:
+    lbu     $t3, 0x0007($sp)
+    addiu   $sp, $sp, 0x0018
+    jr      $ra
+    sb      $t3, 0x0000($a0)
+
+/* void __osPackRequestData(u8) */
+.globl __osPackRequestData
+__osPackRequestData:
+    addiu   $sp, $sp, -0x0010
+    andi    $a0, $a0, 0x00FF
+    sw      $0, 0x0000($sp)
+.L80323F98:
+    lw      $t6, 0x0000($sp)
+    lw      $t8, 0x0000($sp)
+    lui     $at, %hi(__osContPifRam)
+    sll     $t7, $t6, 2
+    addu    $at, $at, $t7
+    sw      $0, %lo(__osContPifRam)($at)
+    addiu   $t9, $t8, 0x0001
+    slti    $at, $t9, 0x0010
+    bnez    $at, .L80323F98
+    sw      $t9, 0x0000($sp)
+    lui     $t9, %hi(__osMaxControllers)
+    lbu     $t9, %lo(__osMaxControllers)($t9)
+    lui     $t1, %hi(__osContPifRam)
+    li      $t0, 0x0001
+    lui     $at, %hi(__osContPifRam+0x3C)
+    addiu   $t1, %lo(__osContPifRam)
+    li      $t2, 0x00FF
+    li      $t3, 0x0001
+    li      $t4, 0x0003
+    li      $t5, 0x00FF
+    li      $t6, 0x00FF
+    li      $t7, 0x00FF
+    li      $t8, 0x00FF
+    sw      $t0, %lo(__osContPifRam+0x3C)($at)
+    sw      $t1, 0x000C($sp)
+    sb      $t2, 0x0004($sp)
+    sb      $t3, 0x0005($sp)
+    sb      $t4, 0x0006($sp)
+    sb      $a0, 0x0007($sp)
+    sb      $t5, 0x0008($sp)
+    sb      $t6, 0x0009($sp)
+    sb      $t7, 0x000A($sp)
+    sb      $t8, 0x000B($sp)
+    blez    $t9, .L8032406C
+    sw      $0, 0x0000($sp)
+.L80324024:
+    addiu   $t1, $sp, 0x0004
+    lw      $at, 0x0000($t1)
+    lw      $t0, 0x000C($sp)
+    lui     $t8, %hi(__osMaxControllers)
+    swl     $at, 0x0000($t0)
+    swr     $at, 0x0003($t0)
+    lw      $t3, 0x0004($t1)
+    swl     $t3, 0x0004($t0)
+    swr     $t3, 0x0007($t0)
+    lw      $t6, 0x0000($sp)
+    lbu     $t8, %lo(__osMaxControllers)($t8)
+    lw      $t4, 0x000C($sp)
+    addiu   $t7, $t6, 0x0001
+    slt     $at, $t7, $t8
+    addiu   $t5, $t4, 0x0008
+    sw      $t7, 0x0000($sp)
+    bnez    $at, .L80324024
+    sw      $t5, 0x000C($sp)
+.L8032406C:
+    lw      $t2, 0x000C($sp)
+    li      $t9, 0x00FE
+    addiu   $sp, $sp, 0x0010
+    jr      $ra
+    sb      $t9, 0x0000($t2)

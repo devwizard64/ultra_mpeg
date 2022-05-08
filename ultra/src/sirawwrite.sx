@@ -1,0 +1,30 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+.globl __osSiRawWriteIo
+__osSiRawWriteIo:
+    addiu   $sp, $sp, -0x0018
+    sw      $ra, 0x0014($sp)
+    sw      $a0, 0x0018($sp)
+    jal     __osSiDeviceBusy
+    sw      $a1, 0x001C($sp)
+    beqz    $v0, .L803287B4
+    nop
+    b       .L803287CC
+    li      $v0, -0x0001
+.L803287B4:
+    lw      $t7, 0x0018($sp)
+    lw      $t6, 0x001C($sp)
+    li      $at, 0xA0000000
+    or      $t8, $t7, $at
+    move    $v0, $0
+    sw      $t6, 0x0000($t8)
+.L803287CC:
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0018
+    jr      $ra
+    nop

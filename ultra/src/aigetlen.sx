@@ -1,0 +1,13 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* u32 osAiGetLength(void) */
+.globl osAiGetLength
+osAiGetLength:
+    lui     $t6, %hi(0xA4500004)
+    jr      $ra
+    lw      $v0, %lo(0xA4500004)($t6)

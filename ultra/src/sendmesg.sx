@@ -1,0 +1,101 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void osSendMesg(OSMesgQueue *mq, OSMesg msg, s32 flag) */
+.globl osSendMesg
+osSendMesg:
+    addiu   $sp, $sp, -0x0038
+    sw      $ra, 0x0024($sp)
+    sw      $a0, 0x0038($sp)
+    sw      $a1, 0x003C($sp)
+    sw      $a2, 0x0040($sp)
+    sw      $s2, 0x0020($sp)
+    sw      $s1, 0x001C($sp)
+    jal     __osDisableInt
+    sw      $s0, 0x0018($sp)
+    lw      $t6, 0x0038($sp)
+    move    $s0, $v0
+    lw      $t7, 0x0008($t6)
+    lw      $t8, 0x0010($t6)
+    slt     $at, $t7, $t8
+    bnez    $at, .L80322CBC
+    nop
+.L80322C60:
+    lw      $t9, 0x0040($sp)
+    li      $at, 0x0001
+    bne     $t9, $at, .L80322C94
+    nop
+    lui     $t1, %hi(__osRunningThread)
+    lw      $t1, %lo(__osRunningThread)($t1)
+    li      $t0, 0x0008
+    sh      $t0, 0x0010($t1)
+    lw      $a0, 0x0038($sp)
+    jal     __osEnqueueAndYield
+    addiu   $a0, $a0, 0x0004
+    b       .L80322CA4
+    nop
+.L80322C94:
+    jal     __osRestoreInt
+    move    $a0, $s0
+    b       .L80322D54
+    li      $v0, -0x0001
+.L80322CA4:
+    lw      $t2, 0x0038($sp)
+    lw      $t3, 0x0008($t2)
+    lw      $t4, 0x0010($t2)
+    slt     $at, $t3, $t4
+    beqz    $at, .L80322C60
+    nop
+.L80322CBC:
+    lw      $t5, 0x0038($sp)
+    lw      $t0, 0x003C($sp)
+    lw      $t6, 0x000C($t5)
+    lw      $t7, 0x0008($t5)
+    lw      $t9, 0x0010($t5)
+    lw      $t1, 0x0014($t5)
+    addu    $t8, $t6, $t7
+    div     $0, $t8, $t9
+    mfhi    $s1
+    sll     $t2, $s1, 2
+    addu    $t3, $t1, $t2
+    sw      $t0, 0x0000($t3)
+    lw      $t4, 0x0038($sp)
+    bnez    $t9, .L80322CFC
+    nop
+    break   7
+.L80322CFC:
+    li      $at, -0x0001
+    bne     $t9, $at, .L80322D14
+    li      $at, 0x80000000
+    bne     $t8, $at, .L80322D14
+    nop
+    break   6
+.L80322D14:
+    lw      $t6, 0x0008($t4)
+    addiu   $t7, $t6, 0x0001
+    sw      $t7, 0x0008($t4)
+    lw      $t8, 0x0038($sp)
+    lw      $t9, 0x0000($t8)
+    lw      $t5, 0x0000($t9)
+    beqz    $t5, .L80322D48
+    nop
+    jal     __osPopThread
+    move    $a0, $t8
+    move    $s2, $v0
+    jal     osStartThread
+    move    $a0, $s2
+.L80322D48:
+    jal     __osRestoreInt
+    move    $a0, $s0
+    move    $v0, $0
+.L80322D54:
+    lw      $ra, 0x0024($sp)
+    lw      $s0, 0x0018($sp)
+    lw      $s1, 0x001C($sp)
+    lw      $s2, 0x0020($sp)
+    jr      $ra
+    addiu   $sp, $sp, 0x0038

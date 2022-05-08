@@ -1,0 +1,170 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+.set gp=64
+.set fp=32
+
+.align 4
+
+.globl __d_to_ll
+__d_to_ll:
+    trunc.l.d $f4, $f12
+    dmfc1   $v0, $f4
+    nop
+    dsll32  $v1, $v0, 0
+    dsra32  $v1, $v1, 0
+    jr      $ra
+    dsra32  $v0, $v0, 0
+
+.globl __f_to_ll
+__f_to_ll:
+    trunc.l.s $f4, $f12
+    dmfc1   $v0, $f4
+    nop
+    dsll32  $v1, $v0, 0
+    dsra32  $v1, $v1, 0
+    jr      $ra
+    dsra32  $v0, $v0, 0
+
+.globl __d_to_ull
+__d_to_ull:
+    cfc1    $t6, $31
+    li      $v0, 0x0001
+    ctc1    $v0, $31
+    nop
+    cvt.l.d $f4, $f12
+    cfc1    $v0, $31
+    nop
+    andi    $at, $v0, 0x0004
+    andi    $v0, $v0, 0x0078
+    beqz    $v0, .L803251B4
+    li      $at, 0x43E00000
+    mtc1    $at, $f5
+    mtc1    $0, $f4
+    li      $v0, 0x0001
+    sub.d   $f4, $f12, $f4
+    ctc1    $v0, $31
+    nop
+    cvt.l.d $f4, $f4
+    cfc1    $v0, $31
+    nop
+    andi    $at, $v0, 0x0004
+    andi    $v0, $v0, 0x0078
+    bnez    $v0, .L803251AC
+    nop
+    lui     $t7, %hi(__d_to_ull__803397C0)
+    ld      $t7, %lo(__d_to_ull__803397C0)($t7)
+    dmfc1   $v0, $f4
+    b       .L803251C4
+    or      $v0, $v0, $t7
+.L803251AC:
+    b       .L803251C4
+    li      $v0, -0x0001
+.L803251B4:
+    dmfc1   $v0, $f4
+    nop
+    bltz    $v0, .L803251AC
+    nop
+.L803251C4:
+    ctc1    $t6, $31
+    dsll32  $v1, $v0, 0
+    dsra32  $v1, $v1, 0
+    jr      $ra
+    dsra32  $v0, $v0, 0
+
+.globl __f_to_ull
+__f_to_ull:
+    cfc1    $t6, $31
+    li      $v0, 0x0001
+    ctc1    $v0, $31
+    nop
+    cvt.l.s $f4, $f12
+    cfc1    $v0, $31
+    nop
+    andi    $at, $v0, 0x0004
+    andi    $v0, $v0, 0x0078
+    beqz    $v0, .L80325250
+    li      $at, 0x5F000000
+    mtc1    $at, $f4
+    li      $v0, 0x0001
+    sub.s   $f4, $f12, $f4
+    ctc1    $v0, $31
+    nop
+    cvt.l.s $f4, $f4
+    cfc1    $v0, $31
+    nop
+    andi    $at, $v0, 0x0004
+    andi    $v0, $v0, 0x0078
+    bnez    $v0, .L80325248
+    nop
+    lui     $t7, %hi(__f_to_ull__803397C8)
+    ld      $t7, %lo(__f_to_ull__803397C8)($t7)
+    dmfc1   $v0, $f4
+    b       .L80325260
+    or      $v0, $v0, $t7
+.L80325248:
+    b       .L80325260
+    li      $v0, -0x0001
+.L80325250:
+    dmfc1   $v0, $f4
+    nop
+    bltz    $v0, .L80325248
+    nop
+.L80325260:
+    ctc1    $t6, $31
+    dsll32  $v1, $v0, 0
+    dsra32  $v1, $v1, 0
+    jr      $ra
+    dsra32  $v0, $v0, 0
+
+.globl __ll_to_d
+__ll_to_d:
+    sw      $a0, 0x0000($sp)
+    sw      $a1, 0x0004($sp)
+    ld      $t6, 0x0000($sp)
+    dmtc1   $t6, $f4
+    jr      $ra
+    cvt.d.l $f0, $f4
+
+.globl __ll_to_f
+__ll_to_f:
+    sw      $a0, 0x0000($sp)
+    sw      $a1, 0x0004($sp)
+    ld      $t6, 0x0000($sp)
+    dmtc1   $t6, $f4
+    jr      $ra
+    cvt.s.l $f0, $f4
+
+.globl __ull_to_d
+__ull_to_d:
+    sw      $a0, 0x0000($sp)
+    sw      $a1, 0x0004($sp)
+    ld      $t6, 0x0000($sp)
+    dmtc1   $t6, $f4
+    bgez    $t6, .L803252D0
+    cvt.d.l $f0, $f4
+    li      $at, 0x41F00000
+    mtc1    $at, $f7
+    mtc1    $0, $f6
+    nop
+    add.d   $f0, $f0, $f6
+.L803252D0:
+    jr      $ra
+    nop
+
+.globl __ull_to_f
+__ull_to_f:
+    sw      $a0, 0x0000($sp)
+    sw      $a1, 0x0004($sp)
+    ld      $t6, 0x0000($sp)
+    dmtc1   $t6, $f4
+    bgez    $t6, .L80325300
+    cvt.s.l $f0, $f4
+    li      $at, 0x4F800000
+    mtc1    $at, $f6
+    nop
+    add.s   $f0, $f0, $f6
+.L80325300:
+    jr      $ra
+    nop

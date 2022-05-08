@@ -1,0 +1,12 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* float sqrtf(float value) */
+.globl sqrtf
+sqrtf:
+    jr      $ra
+    sqrt.s  $f0, $f12

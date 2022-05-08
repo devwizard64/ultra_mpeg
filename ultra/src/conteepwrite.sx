@@ -1,0 +1,346 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void osEepromWrite(OSMesgQueue *mq, u8 address, u8 *buffer) */
+.globl osEepromWrite
+osEepromWrite:
+    addiu   $sp, $sp, -0x0038
+    sw      $a1, 0x003C($sp)
+    lbu     $t7, 0x003F($sp)
+    lui     $t6, %hi(__osEepPifRam)
+    addiu   $t6, %lo(__osEepPifRam)
+    slti    $at, $t7, 0x0041
+    sw      $ra, 0x0014($sp)
+    sw      $a0, 0x0038($sp)
+    sw      $a2, 0x0040($sp)
+    sw      $0, 0x0034($sp)
+    bnez    $at, .L80328B28
+    sw      $t6, 0x002C($sp)
+    b       .L80328C90
+    li      $v0, -0x0001
+.L80328B28:
+    jal     __osSiGetAccess
+    nop
+    lw      $a0, 0x0038($sp)
+    jal     __osEepStatus
+    addiu   $a1, $sp, 0x001C
+    sw      $v0, 0x0034($sp)
+    lw      $t8, 0x0034($sp)
+    bnez    $t8, .L80328B5C
+    nop
+    lhu     $t9, 0x001C($sp)
+    li      $at, 0x8000
+    beq     $t9, $at, .L80328B64
+    nop
+.L80328B5C:
+    b       .L80328C90
+    li      $v0, 0x0008
+.L80328B64:
+    lbu     $t0, 0x001E($sp)
+    andi    $t1, $t0, 0x0080
+    beqz    $t1, .L80328B90
+    nop
+.L80328B74:
+    lw      $a0, 0x0038($sp)
+    jal     __osEepStatus
+    addiu   $a1, $sp, 0x001C
+    lbu     $t2, 0x001E($sp)
+    andi    $t3, $t2, 0x0080
+    bnez    $t3, .L80328B74
+    nop
+.L80328B90:
+    lbu     $a0, 0x003F($sp)
+    jal     __osPackEepWriteData
+    lw      $a1, 0x0040($sp)
+    lui     $a1, %hi(__osEepPifRam)
+    addiu   $a1, %lo(__osEepPifRam)
+    jal     __osSiRawStartDma
+    li      $a0, 0x0001
+    sw      $v0, 0x0034($sp)
+    lw      $a0, 0x0038($sp)
+    move    $a1, $0
+    jal     osRecvMesg
+    li      $a2, 0x0001
+    sw      $0, 0x0030($sp)
+.L80328BC4:
+    lw      $t5, 0x0030($sp)
+    lw      $t7, 0x0030($sp)
+    lui     $at, %hi(__osEepPifRam)
+    sll     $t6, $t5, 2
+    addu    $at, $at, $t6
+    li      $t4, 0x00FF
+    sw      $t4, %lo(__osEepPifRam)($at)
+    addiu   $t8, $t7, 0x0001
+    slti    $at, $t8, 0x0010
+    bnez    $at, .L80328BC4
+    sw      $t8, 0x0030($sp)
+    lui     $at, %hi(__osEepPifRam+0x3C)
+    lui     $a1, %hi(__osEepPifRam)
+    sw      $0, %lo(__osEepPifRam+0x3C)($at)
+    addiu   $a1, %lo(__osEepPifRam)
+    jal     __osSiRawStartDma
+    move    $a0, $0
+    li      $t9, 0x0005
+    lui     $at, %hi(__osContLastCmd)
+    sw      $v0, 0x0034($sp)
+    sb      $t9, %lo(__osContLastCmd)($at)
+    lw      $a0, 0x0038($sp)
+    move    $a1, $0
+    jal     osRecvMesg
+    li      $a2, 0x0001
+    sw      $0, 0x0030($sp)
+.L80328C2C:
+    lw      $t2, 0x0030($sp)
+    lw      $t0, 0x002C($sp)
+    addiu   $t3, $t2, 0x0001
+    slti    $at, $t3, 0x0004
+    addiu   $t1, $t0, 0x0001
+    sw      $t3, 0x0030($sp)
+    bnez    $at, .L80328C2C
+    sw      $t1, 0x002C($sp)
+    lw      $t4, 0x002C($sp)
+    addiu   $t5, $sp, 0x0020
+    lwl     $at, 0x0000($t4)
+    lwr     $at, 0x0003($t4)
+    sw      $at, 0x0000($t5)
+    lwl     $t7, 0x0004($t4)
+    lwr     $t7, 0x0007($t4)
+    sw      $t7, 0x0004($t5)
+    lwl     $at, 0x0008($t4)
+    lwr     $at, 0x000B($t4)
+    sw      $at, 0x0008($t5)
+    lbu     $t8, 0x0021($sp)
+    andi    $t9, $t8, 0x00C0
+    sra     $t0, $t9, 4
+    jal     __osSiRelAccess
+    sw      $t0, 0x0034($sp)
+    lw      $v0, 0x0034($sp)
+.L80328C90:
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0038
+    jr      $ra
+    nop
+
+/* void __osPackEepWriteData(u8, u8 *) */
+__osPackEepWriteData:
+    addiu   $sp, $sp, -0x0018
+    lui     $t6, %hi(__osEepPifRam)
+    addiu   $t6, %lo(__osEepPifRam)
+    andi    $a0, $a0, 0x00FF
+    sw      $t6, 0x0014($sp)
+    sw      $0, 0x0004($sp)
+.L80328CB8:
+    lw      $t8, 0x0004($sp)
+    lw      $t0, 0x0004($sp)
+    lui     $at, %hi(__osEepPifRam)
+    sll     $t9, $t8, 2
+    addu    $at, $at, $t9
+    li      $t7, 0x00FF
+    sw      $t7, %lo(__osEepPifRam)($at)
+    addiu   $t1, $t0, 0x0001
+    slti    $at, $t1, 0x0010
+    bnez    $at, .L80328CB8
+    sw      $t1, 0x0004($sp)
+    li      $t2, 0x0001
+    lui     $at, %hi(__osEepPifRam+0x3C)
+    li      $t3, 0x000A
+    li      $t4, 0x0001
+    li      $t5, 0x0005
+    sw      $t2, %lo(__osEepPifRam+0x3C)($at)
+    sb      $t3, 0x0008($sp)
+    sb      $t4, 0x0009($sp)
+    sb      $t5, 0x000A($sp)
+    sb      $a0, 0x000B($sp)
+    sw      $0, 0x0004($sp)
+.L80328D10:
+    lw      $t8, 0x0004($sp)
+    lbu     $t6, 0x0000($a1)
+    addiu   $a1, $a1, 0x0001
+    addu    $t7, $sp, $t8
+    sb      $t6, 0x000C($t7)
+    lw      $t9, 0x0004($sp)
+    addiu   $t0, $t9, 0x0001
+    slti    $at, $t0, 0x0008
+    bnez    $at, .L80328D10
+    sw      $t0, 0x0004($sp)
+    sw      $0, 0x0004($sp)
+.L80328D3C:
+    lw      $t1, 0x0014($sp)
+    sb      $0, 0x0000($t1)
+    lw      $t4, 0x0004($sp)
+    lw      $t2, 0x0014($sp)
+    addiu   $t5, $t4, 0x0001
+    slti    $at, $t5, 0x0004
+    addiu   $t3, $t2, 0x0001
+    sw      $t5, 0x0004($sp)
+    bnez    $at, .L80328D3C
+    sw      $t3, 0x0014($sp)
+    addiu   $t8, $sp, 0x0008
+    lw      $at, 0x0000($t8)
+    lw      $t6, 0x0014($sp)
+    li      $t2, 0x00FE
+    swl     $at, 0x0000($t6)
+    swr     $at, 0x0003($t6)
+    lw      $t9, 0x0004($t8)
+    swl     $t9, 0x0004($t6)
+    swr     $t9, 0x0007($t6)
+    lw      $at, 0x0008($t8)
+    swl     $at, 0x0008($t6)
+    swr     $at, 0x000B($t6)
+    lw      $t0, 0x0014($sp)
+    addiu   $t1, $t0, 0x000C
+    sw      $t1, 0x0014($sp)
+    sb      $t2, 0x0000($t1)
+    jr      $ra
+    addiu   $sp, $sp, 0x0018
+
+/* s32 __osEepStatus(OSMesgQueue *, OSContStatus *) */
+.globl __osEepStatus
+__osEepStatus:
+    addiu   $sp, $sp, -0x0030
+    lui     $t6, %hi(__osEepPifRam)
+    addiu   $t6, %lo(__osEepPifRam)
+    sw      $ra, 0x0014($sp)
+    sw      $a0, 0x0030($sp)
+    sw      $a1, 0x0034($sp)
+    sw      $0, 0x002C($sp)
+    sw      $t6, 0x0024($sp)
+    sw      $0, 0x0028($sp)
+.L80328DD0:
+    lw      $t7, 0x0028($sp)
+    lw      $t9, 0x0028($sp)
+    lui     $at, %hi(__osEepPifRam)
+    sll     $t8, $t7, 2
+    addu    $at, $at, $t8
+    sw      $0, %lo(__osEepPifRam)($at)
+    addiu   $t0, $t9, 0x0001
+    slti    $at, $t0, 0x0010
+    bnez    $at, .L80328DD0
+    sw      $t0, 0x0028($sp)
+    lui     $t2, %hi(__osEepPifRam)
+    li      $t1, 0x0001
+    lui     $at, %hi(__osEepPifRam+0x3C)
+    addiu   $t2, %lo(__osEepPifRam)
+    sw      $t1, %lo(__osEepPifRam+0x3C)($at)
+    sw      $t2, 0x0024($sp)
+    sw      $0, 0x0028($sp)
+.L80328E14:
+    lw      $t3, 0x0024($sp)
+    sb      $0, 0x0000($t3)
+    lw      $t6, 0x0028($sp)
+    lw      $t4, 0x0024($sp)
+    addiu   $t7, $t6, 0x0001
+    slti    $at, $t7, 0x0004
+    addiu   $t5, $t4, 0x0001
+    sw      $t7, 0x0028($sp)
+    bnez    $at, .L80328E14
+    sw      $t5, 0x0024($sp)
+    li      $t8, 0x00FF
+    li      $t9, 0x0001
+    li      $t0, 0x0003
+    li      $t1, 0x00FF
+    li      $t2, 0x00FF
+    li      $t3, 0x00FF
+    li      $t4, 0x00FF
+    sb      $t8, 0x001C($sp)
+    sb      $t9, 0x001D($sp)
+    sb      $t0, 0x001E($sp)
+    sb      $0, 0x001F($sp)
+    sb      $t1, 0x0020($sp)
+    sb      $t2, 0x0021($sp)
+    sb      $t3, 0x0022($sp)
+    sb      $t4, 0x0023($sp)
+    addiu   $t6, $sp, 0x001C
+    lw      $at, 0x0000($t6)
+    lw      $t5, 0x0024($sp)
+    li      $t2, 0x00FE
+    lui     $a1, %hi(__osEepPifRam)
+    swl     $at, 0x0000($t5)
+    swr     $at, 0x0003($t5)
+    lw      $t9, 0x0004($t6)
+    addiu   $a1, %lo(__osEepPifRam)
+    li      $a0, 0x0001
+    swl     $t9, 0x0004($t5)
+    swr     $t9, 0x0007($t5)
+    lw      $t0, 0x0024($sp)
+    addiu   $t1, $t0, 0x0008
+    sw      $t1, 0x0024($sp)
+    jal     __osSiRawStartDma
+    sb      $t2, 0x0000($t1)
+    sw      $v0, 0x002C($sp)
+    lw      $a0, 0x0030($sp)
+    move    $a1, $0
+    jal     osRecvMesg
+    li      $a2, 0x0001
+    li      $t3, 0x0005
+    lui     $at, %hi(__osContLastCmd)
+    lui     $a1, %hi(__osEepPifRam)
+    sb      $t3, %lo(__osContLastCmd)($at)
+    addiu   $a1, %lo(__osEepPifRam)
+    jal     __osSiRawStartDma
+    move    $a0, $0
+    sw      $v0, 0x002C($sp)
+    lw      $a0, 0x0030($sp)
+    move    $a1, $0
+    jal     osRecvMesg
+    li      $a2, 0x0001
+    lw      $t4, 0x002C($sp)
+    beqz    $t4, .L80328F14
+    nop
+    b       .L80328FC0
+    move    $v0, $t4
+.L80328F14:
+    lui     $t8, %hi(__osEepPifRam)
+    addiu   $t8, %lo(__osEepPifRam)
+    sw      $t8, 0x0024($sp)
+    sw      $0, 0x0028($sp)
+.L80328F24:
+    lw      $t7, 0x0024($sp)
+    sb      $0, 0x0000($t7)
+    lw      $t9, 0x0028($sp)
+    lw      $t5, 0x0024($sp)
+    addiu   $t0, $t9, 0x0001
+    slti    $at, $t0, 0x0004
+    addiu   $t6, $t5, 0x0001
+    sw      $t0, 0x0028($sp)
+    bnez    $at, .L80328F24
+    sw      $t6, 0x0024($sp)
+    lw      $t1, 0x0024($sp)
+    addiu   $t2, $sp, 0x001C
+    lwl     $at, 0x0000($t1)
+    lwr     $at, 0x0003($t1)
+    sw      $at, 0x0000($t2)
+    lwl     $t4, 0x0004($t1)
+    lwr     $t4, 0x0007($t1)
+    sw      $t4, 0x0004($t2)
+    lbu     $t8, 0x001E($sp)
+    lw      $t6, 0x0034($sp)
+    andi    $t7, $t8, 0x00C0
+    sra     $t5, $t7, 4
+    sb      $t5, 0x0003($t6)
+    lbu     $t9, 0x0021($sp)
+    lbu     $t3, 0x0020($sp)
+    lw      $t1, 0x0034($sp)
+    sll     $t0, $t9, 8
+    or      $t2, $t0, $t3
+    sh      $t2, 0x0000($t1)
+    lw      $t8, 0x0034($sp)
+    lbu     $t4, 0x0022($sp)
+    sb      $t4, 0x0002($t8)
+    lw      $t7, 0x0034($sp)
+    lbu     $t5, 0x0003($t7)
+    beqz    $t5, .L80328FBC
+    nop
+    b       .L80328FC0
+    move    $v0, $t5
+.L80328FBC:
+    move    $v0, $0
+.L80328FC0:
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0030
+    jr      $ra
+    nop

@@ -1,0 +1,187 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void guMtxF2L(float mf[4][4], Mtx *m) */
+.globl guMtxF2L
+guMtxF2L:
+    li      $at, 0x47800000
+    mtc1    $at, $f0
+    move    $v0, $a1
+    addiu   $v1, $a1, 0x0020
+    move    $a2, $0
+    move    $a3, $a0
+    li      $t4, 0x0004
+    li      $t3, 0x0002
+    li      $t2, 0xFFFF0000
+.L80329474:
+    move    $a0, $0
+    move    $t0, $a3
+    lwc1    $f14, 0x0004($t0)
+    addiu   $a0, $a0, 0x0001
+    lwc1    $f18, 0x0000($t0)
+    mul.s   $f16, $f14, $f0
+    beq     $a0, $t3, .L803294F4
+    nop
+.L80329494:
+    mul.s   $f14, $f18, $f0
+    addiu   $a0, $a0, 0x0001
+    addiu   $v0, $v0, 0x0004
+    addiu   $v1, $v1, 0x0004
+    addiu   $t0, $t0, 0x0008
+    trunc.w.s $f12, $f16
+    trunc.w.s $f14, $f14
+    mfc1    $t1, $f12
+    mfc1    $a1, $f14
+    sra     $t9, $t1, 16
+    andi    $t5, $t9, 0xFFFF
+    and     $t8, $a1, $t2
+    or      $t6, $t8, $t5
+    sll     $t7, $a1, 16
+    and     $t9, $t7, $t2
+    sw      $t6, -0x0004($v0)
+    andi    $t8, $t1, 0xFFFF
+    or      $t5, $t9, $t8
+    sw      $t5, -0x0004($v1)
+    lwc1    $f14, 0x0004($t0)
+    lwc1    $f18, 0x0000($t0)
+    mul.s   $f16, $f14, $f0
+    bne     $a0, $t3, .L80329494
+    nop
+.L803294F4:
+    mul.s   $f14, $f18, $f0
+    addiu   $t0, $t0, 0x0008
+    addiu   $v0, $v0, 0x0004
+    addiu   $v1, $v1, 0x0004
+    trunc.w.s $f12, $f16
+    trunc.w.s $f14, $f14
+    mfc1    $t1, $f12
+    mfc1    $a1, $f14
+    sra     $t9, $t1, 16
+    andi    $t5, $t9, 0xFFFF
+    and     $t8, $a1, $t2
+    or      $t6, $t8, $t5
+    sll     $t7, $a1, 16
+    and     $t9, $t7, $t2
+    andi    $t8, $t1, 0xFFFF
+    sw      $t6, -0x0004($v0)
+    or      $t5, $t9, $t8
+    sw      $t5, -0x0004($v1)
+    addiu   $a2, $a2, 0x0001
+    bne     $a2, $t4, .L80329474
+    addiu   $a3, $a3, 0x0010
+    jr      $ra
+    nop
+
+/* void guMtxIdentF(float mf[4][4]) */
+.globl guMtxIdentF
+guMtxIdentF:
+    li      $at, 0x3F800000
+    move    $v1, $a0
+    mtc1    $at, $f0
+    mtc1    $0, $f2
+    li      $a0, 0x0001
+    move    $v0, $0
+    li      $a3, 0x0004
+    li      $a2, 0x0003
+    li      $a1, 0x0002
+.L80329574:
+    bnezl   $v0, .L80329588
+    swc1    $f2, 0x0000($v1)
+    b       .L80329588
+    swc1    $f0, 0x0000($v1)
+    swc1    $f2, 0x0000($v1)
+.L80329588:
+    bnel    $v0, $a0, .L8032959C
+    swc1    $f2, 0x0004($v1)
+    b       .L8032959C
+    swc1    $f0, 0x0004($v1)
+    swc1    $f2, 0x0004($v1)
+.L8032959C:
+    bnel    $v0, $a1, .L803295B0
+    swc1    $f2, 0x0008($v1)
+    b       .L803295B0
+    swc1    $f0, 0x0008($v1)
+    swc1    $f2, 0x0008($v1)
+.L803295B0:
+    bnel    $v0, $a2, .L803295C4
+    swc1    $f2, 0x000C($v1)
+    b       .L803295C4
+    swc1    $f0, 0x000C($v1)
+    swc1    $f2, 0x000C($v1)
+.L803295C4:
+    addiu   $v0, $v0, 0x0001
+    bne     $v0, $a3, .L80329574
+    addiu   $v1, $v1, 0x0010
+    jr      $ra
+    nop
+
+/* void guMtxIdent(Mtx *m) */
+.globl guMtxIdent
+guMtxIdent:
+    addiu   $sp, $sp, -0x0058
+    sw      $ra, 0x0014($sp)
+    sw      $a0, 0x0058($sp)
+    jal     guMtxIdentF
+    addiu   $a0, $sp, 0x0018
+    addiu   $a0, $sp, 0x0018
+    jal     guMtxF2L
+    lw      $a1, 0x0058($sp)
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0058
+    jr      $ra
+    nop
+
+/* void guMtxL2F(float mf[4][4], Mtx *m) */
+.globl guMtxL2F
+guMtxL2F:
+    li      $at, 0x47800000
+    mtc1    $at, $f0
+    addiu   $sp, $sp, -0x0010
+    move    $v0, $a1
+    addiu   $v1, $a1, 0x0020
+    move    $a2, $0
+    move    $t0, $a0
+    li      $t4, 0x0004
+    li      $t3, 0x0002
+    li      $t2, 0xFFFF0000
+.L80329630:
+    move    $a0, $0
+    move    $t1, $t0
+.L80329638:
+    lw      $t6, 0x0000($v1)
+    lw      $t9, 0x0000($v0)
+    addiu   $a0, $a0, 0x0001
+    srl     $t7, $t6, 16
+    andi    $t8, $t7, 0xFFFF
+    and     $t5, $t9, $t2
+    or      $t6, $t8, $t5
+    sw      $t6, 0x0004($sp)
+    lw      $t7, 0x0000($v1)
+    lw      $t8, 0x0000($v0)
+    lw      $a1, 0x0004($sp)
+    andi    $t9, $t7, 0xFFFF
+    sll     $t5, $t8, 16
+    mtc1    $a1, $f18
+    and     $t6, $t5, $t2
+    or      $a3, $t9, $t6
+    cvt.s.w $f18, $f18
+    mtc1    $a3, $f16
+    sw      $a3, 0x0000($sp)
+    addiu   $v0, $v0, 0x0004
+    addiu   $v1, $v1, 0x0004
+    cvt.s.w $f16, $f16
+    addiu   $t1, $t1, 0x0008
+    div.s   $f18, $f18, $f0
+    div.s   $f16, $f16, $f0
+    swc1    $f18, -0x0008($t1)
+    bne     $a0, $t3, .L80329638
+    swc1    $f16, -0x0004($t1)
+    addiu   $a2, $a2, 0x0001
+    bne     $a2, $t4, .L80329630
+    addiu   $t0, $t0, 0x0010
+    jr      $ra
+    addiu   $sp, $sp, 0x0010

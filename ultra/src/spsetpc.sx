@@ -1,0 +1,24 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+.globl __osSpSetPc
+__osSpSetPc:
+    lui     $t6, %hi(0xA4040010)
+    lw      $a1, %lo(0xA4040010)($t6)
+    addiu   $sp, $sp, -0x0008
+    andi    $t7, $a1, 0x0001
+    bnez    $t7, .L80327F60
+    nop
+    b       .L80327F6C
+    li      $v0, -0x0001
+.L80327F60:
+    lui     $t8, %hi(0xA4080000)
+    sw      $a0, %lo(0xA4080000)($t8)
+    move    $v0, $0
+.L80327F6C:
+    jr      $ra
+    addiu   $sp, $sp, 0x0008

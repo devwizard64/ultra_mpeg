@@ -1,5 +1,5 @@
 # ultra_mpeg - An MPEG-1/2 decoder library for the Nintendo 64
-Copyright (C) 2020  devwizard
+Copyright (C) 2020 - 2022  devwizard
 
 This project is licensed under the terms of the MIT license.  See `LICENSE` for
 more information.
@@ -12,19 +12,16 @@ more information.
   `libmpeg2/`.
 3. Install ffmpeg: `apt install ffmpeg`.
 4. Install a MIPS cross compiler: `apt install gcc-mips-linux-gnu`.
-  * If you are using a toolchain other than `mips-linux-gnu`, edit
-    `build_env.sh` accordingly.
-5. Download armips: https://github.com/Kingcom/armips/releases and
-   place `armips` or `armips.exe` in `tools/`.
-6. Place an English SM64 ROM in `donor/UNSME0.z64`.
-7. Place a video in `mpg/demo.mp4`.
-8. Run `build_mpg.sh`.
+  * If you are using a toolchain other than `mips-linux-gnu`, edit `makefile`
+    accordingly.
+5. Place a video in `src/demo.mp4`.
+6. Run `make`.
 
 ## Using in another project
-* Add `-I` and `-L` flags according to `build_env.sh`.
-* Add `-l mpeg2 -l mpeg2_convert` flags.
-* Include `umpg.c` in your project, and add `-D _UMPG_PL_MPEG` or
-  `-D _UMPG_LIBMPEG2` flags.
+* Add `-I` and `-L` flags according to `makefile`.
+* Add `-lmpeg2 -lmpeg2_convert` flags.
+* Include `umpg.c` in your project, and add `-DUMPG_PL_MPEG` or
+  `-DUMPG_LIBMPEG2` flags.
 * Include the following functions in your codebase:
   * `malloc`
   * `free`
@@ -49,14 +46,11 @@ more information.
   * `osAiSetNextBuffer` (pl_mpeg)
   * `memcmp` (libmpeg2)
   * `osSetTimer` (libmpeg2)
-* To use `mem.c`:
-  * Call `mem_init` to erase any linked heap area
-  * Call `mem_link` to add an area of memory to its heap area.  You may call
-    this as many times as needed.
 
 ## Documentation
-* `struct umpg_t *umpg_init(
-    int x, int y, uint w, uint h, const void *start, const void *end
+* `UMPG *umpg_init(
+    int x, int y, unsigned int w, unsigned int h,
+    const void *start, const void *end
 );`
   * Create an ultra_mpeg object.
   * `x`: X position of output, 10.2
@@ -65,14 +59,14 @@ more information.
   * `h`: Height of output, 10.2
   * `start`: ROM start of MPG data
   * `end`: ROM end of MPG data
-* `void umpg_free(struct umpg_t *umpg);`
+* `void umpg_free(UMPG *umpg);`
   * Free an ultra_mpeg object.
   * `umpg`: ultra_mpeg object
-* `uint umpg_update(struct umpg_t *umpg, Gfx **gfx);`
+* `int umpg_update(UMPG *umpg, Gfx **gfx);`
   * Update an ultra_mpeg object.
   * `umpg`: ultra_mpeg object
   * `gfx`: Buffer to write 3 display list commands.
-* `void umpg_resize(struct umpg_t *umpg, int x, int y, uint w, uint h);`
+* `void umpg_resize(UMPG *umpg, int x, int y, unsigned int w, unsigned int h);`
   * Resize an ultra_mpeg object.
   * `umpg`: ultra_mpeg object
   * `x`: X position of output, 10.2

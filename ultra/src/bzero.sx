@@ -1,0 +1,56 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void bzero(void *, size_t) */
+.globl bzero
+bzero:
+    slti    $at, $a1, 0x000C
+    bnez    $at, .L803245EC
+    subu    $v1, $0, $a0
+    andi    $v1, $v1, 0x0003
+    beqz    $v1, .L80324590
+    subu    $a1, $a1, $v1
+    swl     $0, 0x0000($a0)
+    addu    $a0, $a0, $v1
+.L80324590:
+    li      $at, -0x0020
+    and     $a3, $a1, $at
+    beqz    $a3, .L803245CC
+    subu    $a1, $a1, $a3
+    addu    $a3, $a3, $a0
+.L803245A4:
+    addiu   $a0, $a0, 0x0020
+    sw      $0, -0x0020($a0)
+    sw      $0, -0x001C($a0)
+    sw      $0, -0x0018($a0)
+    sw      $0, -0x0014($a0)
+    sw      $0, -0x0010($a0)
+    sw      $0, -0x000C($a0)
+    sw      $0, -0x0008($a0)
+    bne     $a0, $a3, .L803245A4
+    sw      $0, -0x0004($a0)
+.L803245CC:
+    li      $at, -0x0004
+    and     $a3, $a1, $at
+    beqz    $a3, .L803245EC
+    subu    $a1, $a1, $a3
+    addu    $a3, $a3, $a0
+.L803245E0:
+    addiu   $a0, $a0, 0x0004
+    bne     $a0, $a3, .L803245E0
+    sw      $0, -0x0004($a0)
+.L803245EC:
+    blez    $a1, .L80324604
+    nop
+    addu    $a1, $a1, $a0
+.L803245F8:
+    addiu   $a0, $a0, 0x0001
+    bne     $a0, $a1, .L803245F8
+    sb      $0, -0x0001($a0)
+.L80324604:
+    jr      $ra
+    nop

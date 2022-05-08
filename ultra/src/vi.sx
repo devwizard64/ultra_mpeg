@@ -1,0 +1,86 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+.globl __osViInit
+__osViInit:
+    lui     $t6, %hi(osTvType)
+    lw      $t6, %lo(osTvType)($t6)
+    addiu   $sp, $sp, -0x0018
+    sw      $ra, 0x0014($sp)
+    lui     $at, %hi(osViNtscEnabled)
+    lui     $a0, %hi(vi)
+    addiu   $a0, %lo(vi)
+    li      $a1, 0x0060
+    jal     bzero
+    sw      $t6, %lo(osViNtscEnabled)($at)
+    lui     $t7, %hi(vi)
+    addiu   $t7, %lo(vi)
+    lui     $at, %hi(__osViCurr)
+    sw      $t7, %lo(__osViCurr)($at)
+    lui     $at, %hi(__osViNext)
+    addiu   $t8, $t7, 0x0030
+    sw      $t8, %lo(__osViNext)($at)
+    li      $t9, 0x0001
+    sh      $t9, 0x0032($t7)
+    lui     $t1, %hi(__osViCurr)
+    lw      $t1, %lo(__osViCurr)($t1)
+    li      $t0, 0x0001
+    lui     $t2, %hi(osViNtscEnabled)
+    sh      $t0, 0x0002($t1)
+    lw      $t2, %lo(osViNtscEnabled)($t2)
+    li      $at, 0x0001
+    bne     $t2, $at, .L803275A8
+    nop
+    lui     $t4, %hi(__osViNext)
+    lw      $t4, %lo(__osViNext)($t4)
+    lui     $t3, %hi(osViModeNtscLan1)
+    addiu   $t3, %lo(osViModeNtscLan1)
+    lui     $t5, 0x02E6D354 >> 16
+    ori     $t5, 0x02E6D354 & 0xFFFF
+    lui     $at, %hi(osViClock)
+    sw      $t3, 0x0008($t4)
+    b       .L803275CC
+    sw      $t5, %lo(osViClock)($at)
+.L803275A8:
+    lui     $t8, %hi(__osViNext)
+    lw      $t8, %lo(__osViNext)($t8)
+    lui     $t6, %hi(osViModePalLan1)
+    addiu   $t6, %lo(osViModePalLan1)
+    lui     $t9, 0x02E6025C >> 16
+    ori     $t9, 0x02E6025C & 0xFFFF
+    lui     $at, %hi(osViClock)
+    sw      $t6, 0x0008($t8)
+    sw      $t9, %lo(osViClock)($at)
+.L803275CC:
+    lui     $t0, %hi(__osViNext)
+    lw      $t0, %lo(__osViNext)($t0)
+    li      $t7, 0x0020
+    lui     $t1, %hi(__osViNext)
+    sh      $t7, 0x0000($t0)
+    lw      $t1, %lo(__osViNext)($t1)
+    lui     $t4, %hi(0xA4400010)
+    lw      $t2, 0x0008($t1)
+    lw      $t3, 0x0004($t2)
+    sw      $t3, 0x000C($t1)
+    lw      $t5, %lo(0xA4400010)($t4)
+    sltiu   $at, $t5, 0x000B
+    bnez    $at, .L80327618
+    nop
+.L80327604:
+    lui     $t6, %hi(0xA4400010)
+    lw      $t8, %lo(0xA4400010)($t6)
+    sltiu   $at, $t8, 0x000B
+    beqz    $at, .L80327604
+    nop
+.L80327618:
+    lui     $t9, %hi(0xA4400000)
+    jal     __osViSwapContext
+    sw      $0, %lo(0xA4400000)($t9)
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0018
+    jr      $ra
+    nop

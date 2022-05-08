@@ -1,0 +1,89 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void osPiStartDma(
+    OSIoMesg *mb,
+    s32 priority,
+    s32 direction,
+    u32 devAddr,
+    void *vAddr,
+    u32 nbytes,
+    OSMesgQueue *mq
+) */
+.globl osPiStartDma
+osPiStartDma:
+    addiu   $sp, $sp, -0x0028
+    lui     $t6, %hi(__osPiDevMgr+0x00)
+    lw      $t6, %lo(__osPiDevMgr+0x00)($t6)
+    sw      $ra, 0x001C($sp)
+    sw      $a0, 0x0028($sp)
+    sw      $a1, 0x002C($sp)
+    sw      $a2, 0x0030($sp)
+    sw      $a3, 0x0034($sp)
+    sw      $s1, 0x0018($sp)
+    bnez    $t6, .L80324494
+    sw      $s0, 0x0014($sp)
+    b       .L80324550
+    li      $v0, -0x0001
+.L80324494:
+    lw      $t7, 0x0030($sp)
+    bnez    $t7, .L803244B0
+    nop
+    lw      $t9, 0x0028($sp)
+    li      $t8, 0x000B
+    b       .L803244BC
+    sh      $t8, 0x0000($t9)
+.L803244B0:
+    lw      $t1, 0x0028($sp)
+    li      $t0, 0x000C
+    sh      $t0, 0x0000($t1)
+.L803244BC:
+    lw      $t2, 0x002C($sp)
+    lw      $t3, 0x0028($sp)
+    li      $at, 0x0001
+    sb      $t2, 0x0002($t3)
+    lw      $t5, 0x0028($sp)
+    lw      $t4, 0x0040($sp)
+    sw      $t4, 0x0004($t5)
+    lw      $t7, 0x0028($sp)
+    lw      $t6, 0x0038($sp)
+    sw      $t6, 0x0008($t7)
+    lw      $t9, 0x0028($sp)
+    lw      $t8, 0x0034($sp)
+    sw      $t8, 0x000C($t9)
+    lw      $t1, 0x0028($sp)
+    lw      $t0, 0x003C($sp)
+    sw      $t0, 0x0010($t1)
+    lw      $t2, 0x002C($sp)
+    bne     $t2, $at, .L8032452C
+    nop
+    jal     osPiGetCmdQueue
+    nop
+    move    $s1, $v0
+    move    $a0, $s1
+    lw      $a1, 0x0028($sp)
+    jal     osJamMesg
+    move    $a2, $0
+    b       .L8032454C
+    move    $s0, $v0
+.L8032452C:
+    jal     osPiGetCmdQueue
+    nop
+    move    $s1, $v0
+    move    $a0, $s1
+    lw      $a1, 0x0028($sp)
+    jal     osSendMesg
+    move    $a2, $0
+    move    $s0, $v0
+.L8032454C:
+    move    $v0, $s0
+.L80324550:
+    lw      $ra, 0x001C($sp)
+    lw      $s0, 0x0014($sp)
+    lw      $s1, 0x0018($sp)
+    jr      $ra
+    addiu   $sp, $sp, 0x0028

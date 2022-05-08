@@ -1,0 +1,79 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void osDestroyThread(OSThread *t) */
+.globl osDestroyThread
+osDestroyThread:
+    addiu   $sp, $sp, -0x0038
+    sw      $ra, 0x0024($sp)
+    sw      $a0, 0x0038($sp)
+    sw      $s2, 0x0020($sp)
+    sw      $s1, 0x001C($sp)
+    jal     __osDisableInt
+    sw      $s0, 0x0018($sp)
+    lw      $t6, 0x0038($sp)
+    move    $s0, $v0
+    bnez    $t6, .L8032AEAC
+    nop
+    lui     $t7, %hi(__osRunningThread)
+    lw      $t7, %lo(__osRunningThread)($t7)
+    b       .L8032AECC
+    sw      $t7, 0x0038($sp)
+.L8032AEAC:
+    lw      $t8, 0x0038($sp)
+    li      $at, 0x0001
+    lhu     $t9, 0x0010($t8)
+    beq     $t9, $at, .L8032AECC
+    nop
+    lw      $a0, 0x0008($t8)
+    jal     __osDequeueThread
+    move    $a1, $t8
+.L8032AECC:
+    lui     $t0, %hi(__osActiveQueue)
+    lw      $t0, %lo(__osActiveQueue)($t0)
+    lw      $t1, 0x0038($sp)
+    bne     $t0, $t1, .L8032AEF0
+    nop
+    lw      $t2, 0x000C($t0)
+    lui     $at, %hi(__osActiveQueue)
+    b       .L8032AF2C
+    sw      $t2, %lo(__osActiveQueue)($at)
+.L8032AEF0:
+    lui     $s1, %hi(__osActiveQueue)
+    lw      $s1, %lo(__osActiveQueue)($s1)
+    lw      $s2, 0x000C($s1)
+    beqz    $s2, .L8032AF2C
+    nop
+.L8032AF04:
+    lw      $t3, 0x0038($sp)
+    bne     $s2, $t3, .L8032AF1C
+    nop
+    lw      $t4, 0x000C($t3)
+    b       .L8032AF2C
+    sw      $t4, 0x000C($s1)
+.L8032AF1C:
+    move    $s1, $s2
+    lw      $s2, 0x000C($s1)
+    bnez    $s2, .L8032AF04
+    nop
+.L8032AF2C:
+    lui     $t6, %hi(__osRunningThread)
+    lw      $t6, %lo(__osRunningThread)($t6)
+    lw      $t5, 0x0038($sp)
+    bne     $t5, $t6, .L8032AF48
+    nop
+    jal     __osDispatchThread
+    nop
+.L8032AF48:
+    jal     __osRestoreInt
+    move    $a0, $s0
+    lw      $ra, 0x0024($sp)
+    lw      $s0, 0x0018($sp)
+    lw      $s1, 0x001C($sp)
+    lw      $s2, 0x0020($sp)
+    jr      $ra
+    addiu   $sp, $sp, 0x0038

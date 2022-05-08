@@ -1,0 +1,37 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void osViSetEvent(OSMesgQueue *mq, OSMesg msg, u32 retraceCount) */
+.globl osViSetEvent
+osViSetEvent:
+    addiu   $sp, $sp, -0x0028
+    sw      $ra, 0x001C($sp)
+    sw      $a0, 0x0028($sp)
+    sw      $a1, 0x002C($sp)
+    sw      $a2, 0x0030($sp)
+    jal     __osDisableInt
+    sw      $s0, 0x0018($sp)
+    lui     $t7, %hi(__osViNext)
+    lw      $t7, %lo(__osViNext)($t7)
+    lw      $t6, 0x0028($sp)
+    lui     $t9, %hi(__osViNext)
+    lui     $t1, %hi(__osViNext)
+    sw      $t6, 0x0010($t7)
+    lw      $t9, %lo(__osViNext)($t9)
+    lw      $t8, 0x002C($sp)
+    move    $s0, $v0
+    move    $a0, $s0
+    sw      $t8, 0x0014($t9)
+    lw      $t1, %lo(__osViNext)($t1)
+    lw      $t0, 0x0030($sp)
+    jal     __osRestoreInt
+    sh      $t0, 0x0002($t1)
+    lw      $ra, 0x001C($sp)
+    lw      $s0, 0x0018($sp)
+    addiu   $sp, $sp, 0x0028
+    jr      $ra
+    nop

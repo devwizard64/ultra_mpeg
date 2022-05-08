@@ -1,0 +1,44 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* u32 osVirtualToPhysical(void *vaddr) */
+.globl osVirtualToPhysical
+osVirtualToPhysical:
+    addiu   $sp, $sp, -0x0018
+    sw      $a0, 0x0018($sp)
+    lw      $t6, 0x0018($sp)
+    li      $at, 0x80000000
+    sw      $ra, 0x0014($sp)
+    sltu    $at, $t6, $at
+    bnez    $at, .L80327EE8
+    li      $at, 0xA0000000
+    sltu    $at, $t6, $at
+    beqz    $at, .L80327EE8
+    lui     $at, 0x1FFFFFFF >> 16
+    ori     $at, 0x1FFFFFFF & 0xFFFF
+    b       .L80327F1C
+    and     $v0, $t6, $at
+.L80327EE8:
+    lw      $t7, 0x0018($sp)
+    li      $at, 0xA0000000
+    sltu    $at, $t7, $at
+    bnez    $at, .L80327F14
+    li      $at, 0xC0000000
+    sltu    $at, $t7, $at
+    beqz    $at, .L80327F14
+    lui     $at, 0x1FFFFFFF >> 16
+    ori     $at, 0x1FFFFFFF & 0xFFFF
+    b       .L80327F1C
+    and     $v0, $t7, $at
+.L80327F14:
+    jal     __osProbeTLB
+    lw      $a0, 0x0018($sp)
+.L80327F1C:
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0018
+    jr      $ra
+    nop

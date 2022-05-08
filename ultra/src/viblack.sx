@@ -1,0 +1,40 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void osViBlack(u8 active) */
+.globl osViBlack
+osViBlack:
+    addiu   $sp, $sp, -0x0028
+    sw      $ra, 0x001C($sp)
+    sw      $a0, 0x0028($sp)
+    jal     __osDisableInt
+    sw      $s0, 0x0018($sp)
+    lbu     $t6, 0x002B($sp)
+    move    $s0, $v0
+    beqz    $t6, .L8032337C
+    nop
+    lui     $t7, %hi(__osViNext)
+    lw      $t7, %lo(__osViNext)($t7)
+    lhu     $t8, 0x0000($t7)
+    ori     $t9, $t8, 0x0020
+    b       .L80323394
+    sh      $t9, 0x0000($t7)
+.L8032337C:
+    lui     $t0, %hi(__osViNext)
+    lw      $t0, %lo(__osViNext)($t0)
+    li      $at, -0x0021
+    lhu     $t1, 0x0000($t0)
+    and     $t2, $t1, $at
+    sh      $t2, 0x0000($t0)
+.L80323394:
+    jal     __osRestoreInt
+    move    $a0, $s0
+    lw      $ra, 0x001C($sp)
+    lw      $s0, 0x0018($sp)
+    addiu   $sp, $sp, 0x0028
+    jr      $ra
+    nop

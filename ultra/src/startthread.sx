@@ -1,0 +1,100 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void osStartThread(OSThread *t) */
+.globl osStartThread
+osStartThread:
+    addiu   $sp, $sp, -0x0028
+    sw      $ra, 0x001C($sp)
+    sw      $a0, 0x0028($sp)
+    sw      $s1, 0x0018($sp)
+    jal     __osDisableInt
+    sw      $s0, 0x0014($sp)
+    lw      $t6, 0x0028($sp)
+    li      $at, 0x0001
+    move    $s0, $v0
+    lhu     $s1, 0x0010($t6)
+    beq     $s1, $at, .L80322E4C
+    li      $at, 0x0008
+    bne     $s1, $at, .L80322ECC
+    nop
+    lw      $t8, 0x0028($sp)
+    li      $t7, 0x0002
+    lui     $a0, %hi(__osRunQueue)
+    sh      $t7, 0x0010($t8)
+    lw      $a1, 0x0028($sp)
+    jal     __osEnqueueThread
+    addiu   $a0, %lo(__osRunQueue)
+    b       .L80322ECC
+    nop
+.L80322E4C:
+    lw      $t9, 0x0028($sp)
+    lw      $t0, 0x0008($t9)
+    beqz    $t0, .L80322E6C
+    nop
+    lui     $t1, %hi(__osRunQueue)
+    addiu   $t1, %lo(__osRunQueue)
+    bne     $t0, $t1, .L80322E90
+    nop
+.L80322E6C:
+    lw      $t3, 0x0028($sp)
+    li      $t2, 0x0002
+    lui     $a0, %hi(__osRunQueue)
+    sh      $t2, 0x0010($t3)
+    lw      $a1, 0x0028($sp)
+    jal     __osEnqueueThread
+    addiu   $a0, %lo(__osRunQueue)
+    b       .L80322ECC
+    nop
+.L80322E90:
+    lw      $t5, 0x0028($sp)
+    li      $t4, 0x0008
+    sh      $t4, 0x0010($t5)
+    lw      $t6, 0x0028($sp)
+    lw      $a0, 0x0008($t6)
+    jal     __osEnqueueThread
+    move    $a1, $t6
+    lw      $t7, 0x0028($sp)
+    jal     __osPopThread
+    lw      $a0, 0x0008($t7)
+    move    $s1, $v0
+    lui     $a0, %hi(__osRunQueue)
+    addiu   $a0, %lo(__osRunQueue)
+    jal     __osEnqueueThread
+    move    $a1, $s1
+.L80322ECC:
+    lui     $t8, %hi(__osRunningThread)
+    lw      $t8, %lo(__osRunningThread)($t8)
+    bnez    $t8, .L80322EEC
+    nop
+    jal     __osDispatchThread
+    nop
+    b       .L80322F24
+    nop
+.L80322EEC:
+    lui     $t9, %hi(__osRunningThread)
+    lui     $t1, %hi(__osRunQueue)
+    lw      $t1, %lo(__osRunQueue)($t1)
+    lw      $t9, %lo(__osRunningThread)($t9)
+    lw      $t2, 0x0004($t1)
+    lw      $t0, 0x0004($t9)
+    slt     $at, $t0, $t2
+    beqz    $at, .L80322F24
+    nop
+    li      $t3, 0x0002
+    lui     $a0, %hi(__osRunQueue)
+    sh      $t3, 0x0010($t9)
+    jal     __osEnqueueAndYield
+    addiu   $a0, %lo(__osRunQueue)
+.L80322F24:
+    jal     __osRestoreInt
+    move    $a0, $s0
+    lw      $ra, 0x001C($sp)
+    lw      $s0, 0x0014($sp)
+    lw      $s1, 0x0018($sp)
+    jr      $ra
+    addiu   $sp, $sp, 0x0028

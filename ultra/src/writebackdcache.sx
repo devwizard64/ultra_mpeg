@@ -1,0 +1,43 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void osWritebackDCache(void *vaddr, s32 nbytes) */
+.globl osWritebackDCache
+osWritebackDCache:
+    blez    $a1, .L80325D68
+    nop
+    li      $t3, 0x2000
+    sltu    $at, $a1, $t3
+    beqz    $at, .L80325D70
+    nop
+    move    $t0, $a0
+    addu    $t1, $a0, $a1
+    sltu    $at, $t0, $t1
+    beqz    $at, .L80325D68
+    nop
+    andi    $t2, $t0, 0x000F
+    addiu   $t1, $t1, -0x0010
+    subu    $t0, $t0, $t2
+.L80325D58:
+    cache   0x19, 0x0000($t0)
+    sltu    $at, $t0, $t1
+    bnez    $at, .L80325D58
+    addiu   $t0, $t0, 0x0010
+.L80325D68:
+    jr      $ra
+    nop
+.L80325D70:
+    lui     $t0, %hi(0x80000000)
+    addu    $t1, $t0, $t3
+    addiu   $t1, $t1, -0x0010
+.L80325D7C:
+    cache   0x01, %lo(0x80000000)($t0)
+    sltu    $at, $t0, $t1
+    bnez    $at, .L80325D7C
+    addiu   $t0, $t0, 0x0010
+    jr      $ra
+    nop

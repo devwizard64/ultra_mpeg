@@ -1,0 +1,59 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+.globl __osProbeTLB
+__osProbeTLB:
+    mfc0    $t0, C0_ENTRYHI
+    andi    $t1, $t0, 0x00FF
+    li      $at, -0x2000
+    and     $t2, $a0, $at
+    or      $t1, $t1, $t2
+    mtc0    $t1, C0_ENTRYHI
+    nop
+    nop
+    nop
+    tlbp
+    nop
+    nop
+    mfc0    $t3, C0_INX
+    li      $at, 0x80000000
+    and     $t3, $t3, $at
+    bnez    $t3, .L8032B018
+    nop
+    tlbr
+    nop
+    nop
+    nop
+    mfc0    $t3, C0_PAGEMASK
+    addi    $t3, $t3, 0x2000
+    srl     $t3, $t3, 1
+    and     $t4, $t3, $a0
+    bnez    $t4, .L8032AFE8
+    addi    $t3, $t3, -0x0001
+    mfc0    $v0, C0_ENTRYLO0
+    b       .L8032AFEC
+    nop
+.L8032AFE8:
+    mfc0    $v0, C0_ENTRYLO1
+.L8032AFEC:
+    andi    $t5, $v0, 0x0002
+    beqz    $t5, .L8032B018
+    nop
+    lui     $at, 0x3FFFFFC0 >> 16
+    ori     $at, 0x3FFFFFC0 & 0xFFFF
+    and     $v0, $v0, $at
+    sll     $v0, $v0, 6
+    and     $t5, $a0, $t3
+    add     $v0, $v0, $t5
+    b       .L8032B01C
+    nop
+.L8032B018:
+    li      $v0, -0x0001
+.L8032B01C:
+    mtc0    $t0, C0_ENTRYHI
+    jr      $ra
+    nop

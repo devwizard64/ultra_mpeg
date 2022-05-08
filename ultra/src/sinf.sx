@@ -1,0 +1,130 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+.set fp=32
+
+.align 4
+
+/* float sinf(float angle) */
+.globl sinf
+sinf:
+    swc1    $f12, 0x0000($sp)
+    lw      $v0, 0x0000($sp)
+    lwc1    $f4, 0x0000($sp)
+    sra     $v1, $v0, 22
+    andi    $t6, $v1, 0x01FF
+    slti    $at, $t6, 0x00FF
+    beqz    $at, .L80325500
+    move    $v1, $t6
+    slti    $at, $t6, 0x00E6
+    bnez    $at, .L803254F8
+    cvt.d.s $f2, $f4
+    mul.d   $f12, $f2, $f2
+    lui     $v1, %hi(sinf__P)
+    addiu   $v1, %lo(sinf__P)
+    ldc1    $f6, 0x0020($v1)
+    ldc1    $f10, 0x0018($v1)
+    ldc1    $f4, 0x0010($v1)
+    mul.d   $f8, $f6, $f12
+    add.d   $f16, $f8, $f10
+    ldc1    $f10, 0x0008($v1)
+    mul.d   $f18, $f16, $f12
+    add.d   $f6, $f18, $f4
+    mul.d   $f8, $f6, $f12
+    add.d   $f14, $f10, $f8
+    mul.d   $f16, $f2, $f12
+    nop
+    mul.d   $f18, $f16, $f14
+    add.d   $f4, $f18, $f2
+    jr      $ra
+    cvt.s.d $f0, $f4
+.L803254F8:
+    jr      $ra
+    lwc1    $f0, 0x0000($sp)
+.L80325500:
+    slti    $at, $v1, 0x0136
+    beqz    $at, .L80325618
+    lwc1    $f4, 0x0000($sp)
+    lwc1    $f6, 0x0000($sp)
+    lui     $at, %hi(sinf__rpi)
+    ldc1    $f10, %lo(sinf__rpi)($at)
+    cvt.d.s $f2, $f6
+    mtc1    $0, $f9
+    mul.d   $f0, $f2, $f10
+    mtc1    $0, $f8
+    li      $at, 0x3FE00000
+    c.le.d  $f8, $f0
+    nop
+    bc1fl   .L80325564
+    mtc1    $at, $f7
+    li      $at, 0x3FE00000
+    mtc1    $at, $f17
+    mtc1    $0, $f16
+    nop
+    add.d   $f18, $f0, $f16
+    trunc.w.d $f4, $f18
+    mfc1    $v0, $f4
+    b       .L80325580
+    mtc1    $v0, $f16
+    mtc1    $at, $f7
+.L80325564:
+    mtc1    $0, $f6
+    nop
+    sub.d   $f10, $f0, $f6
+    trunc.w.d $f8, $f10
+    mfc1    $v0, $f8
+    nop
+    mtc1    $v0, $f16
+.L80325580:
+    lui     $at, %hi(sinf__pihi)
+    ldc1    $f18, %lo(sinf__pihi)($at)
+    cvt.d.w $f0, $f16
+    lui     $at, %hi(sinf__pilo)
+    ldc1    $f6, %lo(sinf__pilo)($at)
+    lui     $v1, %hi(sinf__P)
+    addiu   $v1, %lo(sinf__P)
+    mul.d   $f4, $f0, $f18
+    ldc1    $f8, 0x0020($v1)
+    ldc1    $f18, 0x0018($v1)
+    andi    $t9, $v0, 0x0001
+    mul.d   $f10, $f0, $f6
+    sub.d   $f2, $f2, $f4
+    sub.d   $f2, $f2, $f10
+    ldc1    $f10, 0x0010($v1)
+    mul.d   $f12, $f2, $f2
+    nop
+    mul.d   $f16, $f8, $f12
+    add.d   $f4, $f16, $f18
+    ldc1    $f18, 0x0008($v1)
+    mul.d   $f6, $f4, $f12
+    add.d   $f8, $f6, $f10
+    mul.d   $f16, $f8, $f12
+    bnez    $t9, .L803255FC
+    add.d   $f14, $f18, $f16
+    mul.d   $f4, $f2, $f12
+    nop
+    mul.d   $f6, $f4, $f14
+    add.d   $f10, $f6, $f2
+    jr      $ra
+    cvt.s.d $f0, $f10
+.L803255FC:
+    mul.d   $f8, $f2, $f12
+    nop
+    mul.d   $f18, $f8, $f14
+    add.d   $f16, $f18, $f2
+    cvt.s.d $f0, $f16
+    jr      $ra
+    neg.s   $f0, $f0
+.L80325618:
+    c.eq.s  $f4, $f4
+    lui     $at, %hi(sinf__zero)
+    bc1t    .L80325634
+    nop
+    lui     $at, %hi(__libm_qnan_f)
+    jr      $ra
+    lwc1    $f0, %lo(__libm_qnan_f)($at)
+.L80325634:
+    lwc1    $f0, %lo(sinf__zero)($at)
+    jr      $ra
+    nop

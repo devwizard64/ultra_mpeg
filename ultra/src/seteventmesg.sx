@@ -1,0 +1,36 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void osSetEventMesg(OSEvent e, OSMesgQueue *mq, OSMesg m) */
+.globl osSetEventMesg
+osSetEventMesg:
+    addiu   $sp, $sp, -0x0028
+    sw      $ra, 0x001C($sp)
+    sw      $a0, 0x0028($sp)
+    sw      $a1, 0x002C($sp)
+    sw      $a2, 0x0030($sp)
+    jal     __osDisableInt
+    sw      $s0, 0x0018($sp)
+    lw      $t6, 0x0028($sp)
+    lui     $t8, %hi(__osEventStateTab)
+    lw      $t0, 0x002C($sp)
+    addiu   $t8, %lo(__osEventStateTab)
+    sll     $t7, $t6, 3
+    addu    $t9, $t7, $t8
+    sw      $t9, 0x0020($sp)
+    sw      $t0, 0x0000($t9)
+    lw      $t2, 0x0020($sp)
+    lw      $t1, 0x0030($sp)
+    move    $s0, $v0
+    move    $a0, $s0
+    jal     __osRestoreInt
+    sw      $t1, 0x0004($t2)
+    lw      $ra, 0x001C($sp)
+    lw      $s0, 0x0018($sp)
+    addiu   $sp, $sp, 0x0028
+    jr      $ra
+    nop

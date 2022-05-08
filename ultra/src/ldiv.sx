@@ -1,0 +1,116 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+.globl lldiv
+lldiv:
+    addiu   $sp, $sp, -0x0030
+    sw      $a0, 0x0030($sp)
+    sw      $ra, 0x0014($sp)
+    sw      $a2, 0x0038($sp)
+    sw      $a3, 0x003C($sp)
+    move    $a0, $a2
+    move    $a1, $a3
+    lw      $a3, 0x0044($sp)
+    jal     __ll_div
+    lw      $a2, 0x0040($sp)
+    sw      $v0, 0x0020($sp)
+    sw      $v1, 0x0024($sp)
+    lw      $a0, 0x0040($sp)
+    lw      $a1, 0x0044($sp)
+    move    $a2, $v0
+    jal     __ll_mul
+    move    $a3, $v1
+    lw      $t6, 0x0038($sp)
+    lw      $t7, 0x003C($sp)
+    lw      $t0, 0x0020($sp)
+    subu    $t8, $t6, $v0
+    sltu    $at, $t7, $v1
+    subu    $t8, $t8, $at
+    subu    $t9, $t7, $v1
+    sw      $t9, 0x002C($sp)
+    sw      $t8, 0x0028($sp)
+    bgtz    $t0, .L8032B128
+    lw      $t1, 0x0024($sp)
+    bltz    $t0, .L8032B0E0
+    nop
+    b       .L8032B12C
+    addiu   $t0, $sp, 0x0020
+.L8032B0E0:
+    bltzl   $t8, .L8032B12C
+    addiu   $t0, $sp, 0x0020
+    bgtz    $t8, .L8032B0F8
+    addiu   $t3, $t1, 0x0001
+    beqzl   $t9, .L8032B12C
+    addiu   $t0, $sp, 0x0020
+.L8032B0F8:
+    lw      $t4, 0x0040($sp)
+    lw      $t5, 0x0044($sp)
+    sltiu   $at, $t3, 0x0001
+    addu    $t2, $t0, $at
+    subu    $t6, $t8, $t4
+    sltu    $at, $t9, $t5
+    subu    $t6, $t6, $at
+    subu    $t7, $t9, $t5
+    sw      $t2, 0x0020($sp)
+    sw      $t3, 0x0024($sp)
+    sw      $t7, 0x002C($sp)
+    sw      $t6, 0x0028($sp)
+.L8032B128:
+    addiu   $t0, $sp, 0x0020
+.L8032B12C:
+    lw      $v0, 0x0030($sp)
+    lw      $at, 0x0000($t0)
+    sw      $at, 0x0000($v0)
+    lw      $t3, 0x0004($t0)
+    sw      $t3, 0x0004($v0)
+    lw      $at, 0x0008($t0)
+    sw      $at, 0x0008($v0)
+    lw      $t3, 0x000C($t0)
+    sw      $t3, 0x000C($v0)
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0030
+    jr      $ra
+    nop
+
+.globl ldiv
+ldiv:
+    div     $0, $a1, $a2
+    mflo    $v0
+    addiu   $sp, $sp, -0x0008
+    bnez    $a2, .L8032B178
+    nop
+    break   7
+.L8032B178:
+    li      $at, -0x0001
+    bne     $a2, $at, .L8032B190
+    li      $at, 0x80000000
+    bne     $a1, $at, .L8032B190
+    nop
+    break   6
+.L8032B190:
+    multu   $a2, $v0
+    sw      $v0, 0x0000($sp)
+    addiu   $t7, $sp, 0x0000
+    mflo    $t6
+    subu    $v1, $a1, $t6
+    bgez    $v0, .L8032B1C8
+    sw      $v1, 0x0004($sp)
+    sw      $v0, 0x0000($sp)
+    blez    $v1, .L8032B1C8
+    sw      $v1, 0x0004($sp)
+    addiu   $v0, $v0, 0x0001
+    subu    $v1, $v1, $a2
+    sw      $v1, 0x0004($sp)
+    sw      $v0, 0x0000($sp)
+.L8032B1C8:
+    lw      $at, 0x0000($t7)
+    move    $v0, $a0
+    sw      $at, 0x0000($a0)
+    lw      $t0, 0x0004($t7)
+    addiu   $sp, $sp, 0x0008
+    jr      $ra
+    sw      $t0, 0x0004($a0)

@@ -1,0 +1,73 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void osSetTimer(
+    OSTimer *timer,
+    OSTime countdown,
+    OSTime interval,
+    OSMesgQueue *mq,
+    OSMesg msg
+) */
+.globl osSetTimer
+osSetTimer:
+    addiu   $sp, $sp, -0x0020
+    sw      $a0, 0x0020($sp)
+    lw      $t6, 0x0020($sp)
+    sw      $ra, 0x0014($sp)
+    sw      $a2, 0x0028($sp)
+    sw      $a3, 0x002C($sp)
+    sw      $0, 0x0000($t6)
+    lw      $t7, 0x0020($sp)
+    sw      $0, 0x0004($t7)
+    lw      $t0, 0x0020($sp)
+    lw      $t9, 0x0034($sp)
+    lw      $t8, 0x0030($sp)
+    sw      $t9, 0x000C($t0)
+    sw      $t8, 0x0008($t0)
+    lw      $t2, 0x0028($sp)
+    lw      $t3, 0x002C($sp)
+    bnez    $t2, .L80328A60
+    nop
+    beqz    $t3, .L80328A70
+    nop
+.L80328A60:
+    lw      $t1, 0x0020($sp)
+    sw      $t2, 0x0010($t1)
+    b       .L80328A84
+    sw      $t3, 0x0014($t1)
+.L80328A70:
+    lw      $t6, 0x0020($sp)
+    lw      $t4, 0x0030($sp)
+    lw      $t5, 0x0034($sp)
+    sw      $t4, 0x0010($t6)
+    sw      $t5, 0x0014($t6)
+.L80328A84:
+    lw      $t7, 0x0038($sp)
+    lw      $t8, 0x0020($sp)
+    sw      $t7, 0x0018($t8)
+    lw      $t0, 0x0020($sp)
+    lw      $t9, 0x003C($sp)
+    sw      $t9, 0x001C($t0)
+    jal     __osInsertTimer
+    lw      $a0, 0x0020($sp)
+    lui     $t2, %hi(__osTimerList)
+    lw      $t2, %lo(__osTimerList)($t2)
+    sw      $v0, 0x0018($sp)
+    sw      $v1, 0x001C($sp)
+    lw      $t1, 0x0020($sp)
+    lw      $t3, 0x0000($t2)
+    bne     $t3, $t1, .L80328AD0
+    nop
+    lw      $a0, 0x0018($sp)
+    jal     __osSetTimerIntr
+    lw      $a1, 0x001C($sp)
+.L80328AD0:
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0020
+    move    $v0, $0
+    jr      $ra
+    nop

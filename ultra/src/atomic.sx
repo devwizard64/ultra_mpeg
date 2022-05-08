@@ -1,0 +1,33 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+.globl __osAtomicDec
+__osAtomicDec:
+    addiu   $sp, $sp, -0x0020
+    sw      $ra, 0x0014($sp)
+    jal     __osDisableInt
+    sw      $a0, 0x0020($sp)
+    lw      $t6, 0x0020($sp)
+    sw      $v0, 0x001C($sp)
+    lw      $t7, 0x0000($t6)
+    beqz    $t7, .L8032B238
+    nop
+    addiu   $t8, $t7, -0x0001
+    sw      $t8, 0x0000($t6)
+    li      $t9, 0x0001
+    b       .L8032B23C
+    sw      $t9, 0x0018($sp)
+.L8032B238:
+    sw      $0, 0x0018($sp)
+.L8032B23C:
+    jal     __osRestoreInt
+    lw      $a0, 0x001C($sp)
+    lw      $ra, 0x0014($sp)
+    lw      $v0, 0x0018($sp)
+    addiu   $sp, $sp, 0x0020
+    jr      $ra
+    nop

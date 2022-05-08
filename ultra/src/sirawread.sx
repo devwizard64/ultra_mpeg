@@ -1,0 +1,31 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+.globl __osSiRawReadIo
+__osSiRawReadIo:
+    addiu   $sp, $sp, -0x0018
+    sw      $ra, 0x0014($sp)
+    sw      $a0, 0x0018($sp)
+    jal     __osSiDeviceBusy
+    sw      $a1, 0x001C($sp)
+    beqz    $v0, .L80328764
+    nop
+    b       .L80328780
+    li      $v0, -0x0001
+.L80328764:
+    lw      $t6, 0x0018($sp)
+    li      $at, 0xA0000000
+    lw      $t9, 0x001C($sp)
+    or      $t7, $t6, $at
+    lw      $t8, 0x0000($t7)
+    move    $v0, $0
+    sw      $t8, 0x0000($t9)
+.L80328780:
+    lw      $ra, 0x0014($sp)
+    addiu   $sp, $sp, 0x0018
+    jr      $ra
+    nop

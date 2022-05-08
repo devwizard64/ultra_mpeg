@@ -1,0 +1,156 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void osInitialize(void) */
+.globl osInitialize
+osInitialize:
+    addiu   $sp, $sp, -0x0038
+    sw      $ra, 0x001C($sp)
+    li      $t6, 0x0001
+    lui     $at, %hi(__osFinalrom)
+    sw      $s0, 0x0018($sp)
+    sw      $0, 0x0030($sp)
+    jal     __osGetSR
+    sw      $t6, %lo(__osFinalrom)($at)
+    move    $s0, $v0
+    li      $at, 0x20000000
+    jal     __osSetSR
+    or      $a0, $s0, $at
+    lui     $a0, 0x01000800 >> 16
+    jal     __osSetFpcCsr
+    ori     $a0, 0x01000800 & 0xFFFF
+    lui     $a0, 0x1FC007FC >> 16
+    ori     $a0, 0x1FC007FC & 0xFFFF
+    jal     __osSiRawReadIo
+    addiu   $a1, $sp, 0x0034
+    beqz    $v0, .L8032383C
+    nop
+.L80323824:
+    lui     $a0, 0x1FC007FC >> 16
+    ori     $a0, 0x1FC007FC & 0xFFFF
+    jal     __osSiRawReadIo
+    addiu   $a1, $sp, 0x0034
+    bnez    $v0, .L80323824
+    nop
+.L8032383C:
+    lw      $a1, 0x0034($sp)
+    lui     $a0, 0x1FC007FC >> 16
+    ori     $a0, 0x1FC007FC & 0xFFFF
+    ori     $t7, $a1, 0x0008
+    jal     __osSiRawWriteIo
+    move    $a1, $t7
+    beqz    $v0, .L8032387C
+    nop
+.L8032385C:
+    lw      $a1, 0x0034($sp)
+    lui     $a0, 0x1FC007FC >> 16
+    ori     $a0, 0x1FC007FC & 0xFFFF
+    ori     $t8, $a1, 0x0008
+    jal     __osSiRawWriteIo
+    move    $a1, $t8
+    bnez    $v0, .L8032385C
+    nop
+.L8032387C:
+    lui     $t0, %hi(__osExceptionPreamble)
+    addiu   $t0, %lo(__osExceptionPreamble)
+    lw      $at, 0x0000($t0)
+    lui     $t9, %hi(0x8000000C)
+    lui     $t5, %hi(__osExceptionPreamble)
+    sw      $at, %lo(0x80000000)($t9)
+    lw      $t3, 0x0004($t0)
+    addiu   $t5, %lo(__osExceptionPreamble)
+    lui     $t4, 0x80000080 >> 16
+    sw      $t3, %lo(0x80000004)($t9)
+    lw      $at, 0x0008($t0)
+    ori     $t4, 0x80000080 & 0xFFFF
+    lui     $t1, %hi(__osExceptionPreamble)
+    sw      $at, %lo(0x80000008)($t9)
+    lw      $t3, 0x000C($t0)
+    addiu   $t1, %lo(__osExceptionPreamble)
+    lui     $t2, 0x80000100 >> 16
+    sw      $t3, %lo(0x8000000C)($t9)
+    lw      $at, 0x0000($t5)
+    ori     $t2, 0x80000100 & 0xFFFF
+    lui     $t6, %hi(__osExceptionPreamble)
+    sw      $at, 0x0000($t4)
+    lw      $t8, 0x0004($t5)
+    addiu   $t6, %lo(__osExceptionPreamble)
+    lui     $t7, 0x80000180 >> 16
+    sw      $t8, 0x0004($t4)
+    lw      $at, 0x0008($t5)
+    ori     $t7, 0x80000180 & 0xFFFF
+    li      $a0, 0x80000000
+    sw      $at, 0x0008($t4)
+    lw      $t8, 0x000C($t5)
+    li      $a1, 0x0190
+    sw      $t8, 0x000C($t4)
+    lw      $at, 0x0000($t1)
+    sw      $at, 0x0000($t2)
+    lw      $t3, 0x0004($t1)
+    sw      $t3, 0x0004($t2)
+    lw      $at, 0x0008($t1)
+    sw      $at, 0x0008($t2)
+    lw      $t3, 0x000C($t1)
+    sw      $t3, 0x000C($t2)
+    lw      $at, 0x0000($t6)
+    sw      $at, 0x0000($t7)
+    lw      $t8, 0x0004($t6)
+    sw      $t8, 0x0004($t7)
+    lw      $at, 0x0008($t6)
+    sw      $at, 0x0008($t7)
+    lw      $t8, 0x000C($t6)
+    jal     osWritebackDCache
+    sw      $t8, 0x000C($t7)
+    li      $a0, 0x80000000
+    jal     osInvalICache
+    li      $a1, 0x0190
+    jal     osMapTLBRdb
+    nop
+    li      $a0, 0x0004
+    jal     osPiRawReadIo
+    addiu   $a1, $sp, 0x0030
+    lw      $t0, 0x0030($sp)
+    li      $at, -0x0010
+    and     $t9, $t0, $at
+    beqz    $t9, .L8032398C
+    sw      $t9, 0x0030($sp)
+    lui     $at, %hi(osClockRate+4)
+    move    $t3, $t9
+    li      $t2, 0x0000
+    sw      $t2, %lo(osClockRate+0)($at)
+    sw      $t3, %lo(osClockRate+4)($at)
+.L8032398C:
+    lui     $a0, %hi(osClockRate+0)
+    lui     $a1, %hi(osClockRate+4)
+    lw      $a1, %lo(osClockRate+4)($a1)
+    lw      $a0, %lo(osClockRate+0)($a0)
+    li      $a2, 0x0000
+    jal     __ll_mul
+    li      $a3, 0x0003
+    sw      $v0, 0x0020($sp)
+    sw      $v1, 0x0024($sp)
+    lw      $a1, 0x0024($sp)
+    lw      $a0, 0x0020($sp)
+    li      $a2, 0x0000
+    jal     __ull_div
+    li      $a3, 0x0004
+    lui     $t1, %hi(osResetType)
+    lw      $t1, %lo(osResetType)($t1)
+    lui     $at, %hi(osClockRate+4)
+    sw      $v0, %lo(osClockRate+0)($at)
+    bnez    $t1, .L803239EC
+    sw      $v1, %lo(osClockRate+4)($at)
+    lui     $a0, %hi(osAppNMIBuffer)
+    addiu   $a0, %lo(osAppNMIBuffer)
+    jal     bzero
+    li      $a1, 0x0040
+.L803239EC:
+    lw      $ra, 0x001C($sp)
+    lw      $s0, 0x0018($sp)
+    addiu   $sp, $sp, 0x0038
+    jr      $ra
+    nop

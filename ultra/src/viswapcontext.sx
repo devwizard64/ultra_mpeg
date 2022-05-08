@@ -1,0 +1,236 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+.globl __osViSwapContext
+__osViSwapContext:
+    addiu   $sp, $sp, -0x0048
+    sw      $s1, 0x001C($sp)
+    sw      $ra, 0x0024($sp)
+    sw      $s2, 0x0020($sp)
+    sw      $s0, 0x0018($sp)
+    sw      $0, 0x0030($sp)
+    lui     $s1, %hi(__osViNext)
+    lui     $t6, %hi(0xA4400010)
+    lw      $s1, %lo(__osViNext)($s1)
+    lw      $t7, %lo(0xA4400010)($t6)
+    lw      $s0, 0x0008($s1)
+    andi    $t8, $t7, 0x0001
+    sw      $t8, 0x0030($sp)
+    jal     osVirtualToPhysical
+    lw      $a0, 0x0004($s1)
+    lw      $t9, 0x0030($sp)
+    move    $s2, $v0
+    sll     $t0, $t9, 2
+    addu    $t0, $t0, $t9
+    sll     $t0, $t0, 2
+    addu    $t1, $s0, $t0
+    lw      $t2, 0x0028($t1)
+    addu    $t3, $t2, $s2
+    sw      $t3, 0x003C($sp)
+    lhu     $t4, 0x0000($s1)
+    andi    $t5, $t4, 0x0002
+    beqz    $t5, .L8032810C
+    nop
+    lw      $t7, 0x0020($s0)
+    lw      $t6, 0x0020($s1)
+    li      $at, -0x1000
+    and     $t8, $t7, $at
+    or      $t9, $t6, $t8
+    b       .L80328114
+    sw      $t9, 0x0020($s1)
+.L8032810C:
+    lw      $t0, 0x0020($s0)
+    sw      $t0, 0x0020($s1)
+.L80328114:
+    lhu     $t1, 0x0000($s1)
+    andi    $t2, $t1, 0x0004
+    beqz    $t2, .L80328224
+    nop
+    lw      $t3, 0x0030($sp)
+    sll     $t4, $t3, 2
+    addu    $t4, $t4, $t3
+    sll     $t4, $t4, 2
+    addu    $t5, $s0, $t4
+    lw      $t7, 0x002C($t5)
+    andi    $t6, $t7, 0x0FFF
+    mtc1    $t6, $f6
+    sw      $t6, 0x0034($sp)
+    lwc1    $f4, 0x0024($s1)
+    bgez    $t6, .L80328164
+    cvt.s.w $f8, $f6
+    li      $at, 0x4F800000
+    mtc1    $at, $f10
+    nop
+    add.s   $f8, $f8, $f10
+.L80328164:
+    mul.s   $f16, $f4, $f8
+    li      $t9, 0x0001
+    cfc1    $t8, $31
+    ctc1    $t9, $31
+    nop
+    cvt.w.s $f18, $f16
+    cfc1    $t9, $31
+    nop
+    andi    $at, $t9, 0x0004
+    andi    $t9, $t9, 0x0078
+    beqz    $t9, .L803281DC
+    li      $at, 0x4F000000
+    mtc1    $at, $f18
+    li      $t9, 0x0001
+    sub.s   $f18, $f16, $f18
+    ctc1    $t9, $31
+    nop
+    cvt.w.s $f18, $f18
+    cfc1    $t9, $31
+    nop
+    andi    $at, $t9, 0x0004
+    andi    $t9, $t9, 0x0078
+    bnez    $t9, .L803281D4
+    nop
+    mfc1    $t9, $f18
+    li      $at, 0x80000000
+    b       .L803281EC
+    or      $t9, $t9, $at
+.L803281D4:
+    b       .L803281EC
+    li      $t9, -0x0001
+.L803281DC:
+    mfc1    $t9, $f18
+    nop
+    bltz    $t9, .L803281D4
+    nop
+.L803281EC:
+    sw      $t9, 0x002C($s1)
+    lw      $t1, 0x0030($sp)
+    lw      $t0, 0x002C($s1)
+    li      $at, -0x1000
+    sll     $t2, $t1, 2
+    addu    $t2, $t2, $t1
+    sll     $t2, $t2, 2
+    addu    $t3, $s0, $t2
+    lw      $t4, 0x002C($t3)
+    ctc1    $t8, $31
+    and     $t5, $t4, $at
+    or      $t7, $t0, $t5
+    b       .L80328240
+    sw      $t7, 0x002C($s1)
+.L80328224:
+    lw      $t6, 0x0030($sp)
+    sll     $t8, $t6, 2
+    addu    $t8, $t8, $t6
+    sll     $t8, $t8, 2
+    addu    $t9, $s0, $t8
+    lw      $t1, 0x002C($t9)
+    sw      $t1, 0x002C($s1)
+.L80328240:
+    lw      $t2, 0x001C($s0)
+    sw      $t2, 0x0038($sp)
+    lhu     $t3, 0x0000($s1)
+    andi    $t4, $t3, 0x0020
+    beqz    $t4, .L8032825C
+    nop
+    sw      $0, 0x0038($sp)
+.L8032825C:
+    lhu     $t0, 0x0000($s1)
+    andi    $t5, $t0, 0x0040
+    beqz    $t5, .L8032827C
+    nop
+    sw      $0, 0x002C($s1)
+    jal     osVirtualToPhysical
+    lw      $a0, 0x0004($s1)
+    sw      $v0, 0x003C($sp)
+.L8032827C:
+    lhu     $t7, 0x0000($s1)
+    andi    $t6, $t7, 0x0080
+    beqz    $t6, .L803282AC
+    nop
+    lhu     $t8, 0x0028($s1)
+    li      $at, 0x03FF0000
+    lw      $a0, 0x0004($s1)
+    sll     $t9, $t8, 16
+    and     $t1, $t9, $at
+    jal     osVirtualToPhysical
+    sw      $t1, 0x002C($s1)
+    sw      $v0, 0x003C($sp)
+.L803282AC:
+    lw      $t2, 0x003C($sp)
+    lui     $t3, %hi(0xA4400020)
+    lui     $t0, %hi(0xA440002C)
+    sw      $t2, %lo(0xA4400004)($t3)
+    lw      $t4, 0x0008($s0)
+    lui     $t7, %hi(0xA4400014)
+    lui     $t8, %hi(0xA4400018)
+    sw      $t4, %lo(0xA4400008)($t0)
+    lw      $t5, 0x000C($s0)
+    lui     $t1, %hi(0xA440001C)
+    lui     $at, %hi(__osViNext)
+    sw      $t5, %lo(0xA4400014)($t7)
+    lw      $t6, 0x0010($s0)
+    sw      $t6, %lo(0xA4400018)($t8)
+    lw      $t9, 0x0014($s0)
+    sw      $t9, %lo(0xA440001C)($t1)
+    lw      $t2, 0x0018($s0)
+    lui     $t9, %hi(0xA440000C)
+    sw      $t2, %lo(0xA4400020)($t3)
+    lw      $t4, 0x0038($sp)
+    sw      $t4, %lo(0xA4400024)($t0)
+    lw      $t5, 0x0030($sp)
+    sll     $t7, $t5, 2
+    addu    $t7, $t7, $t5
+    sll     $t7, $t7, 2
+    addu    $t6, $s0, $t7
+    lw      $t8, 0x0030($t6)
+    sw      $t8, %lo(0xA4400028)($t9)
+    lw      $t1, 0x0030($sp)
+    sll     $t2, $t1, 2
+    addu    $t2, $t2, $t1
+    sll     $t2, $t2, 2
+    addu    $t3, $s0, $t2
+    lw      $t4, 0x0034($t3)
+    lui     $t2, %hi(0xA4400030)
+    sw      $t4, %lo(0xA440002C)($t0)
+    lw      $t5, 0x0030($sp)
+    lui     $t4, %hi(0xA4400034)
+    sll     $t7, $t5, 2
+    addu    $t7, $t7, $t5
+    sll     $t7, $t7, 2
+    addu    $t6, $s0, $t7
+    lw      $t8, 0x0038($t6)
+    lui     $t5, %hi(0xA4400000)
+    lui     $t7, %hi(__osViCurr)
+    sw      $t8, %lo(0xA440000C)($t9)
+    lw      $t1, 0x0020($s1)
+    lui     $t8, %hi(__osViCurr)
+    lui     $t6, %hi(__osViNext)
+    sw      $t1, %lo(0xA4400030)($t2)
+    lw      $t3, 0x002C($s1)
+    sw      $t3, %lo(0xA4400034)($t4)
+    lw      $t0, 0x000C($s1)
+    sw      $t0, %lo(0xA4400000)($t5)
+    lw      $t7, %lo(__osViCurr)($t7)
+    sw      $t7, %lo(__osViNext)($at)
+    lui     $at, %hi(__osViCurr)
+    sw      $s1, %lo(__osViCurr)($at)
+    lw      $t8, %lo(__osViCurr)($t8)
+    lw      $t6, %lo(__osViNext)($t6)
+    addiu   $t2, $t8, 0x0030
+.L803283A0:
+    lw      $at, 0x0000($t8)
+    addiu   $t8, $t8, 0x000C
+    addiu   $t6, $t6, 0x000C
+    sw      $at, -0x000C($t6)
+    lw      $at, -0x0008($t8)
+    sw      $at, -0x0008($t6)
+    lw      $at, -0x0004($t8)
+    bne     $t8, $t2, .L803283A0
+    sw      $at, -0x0004($t6)
+    lw      $ra, 0x0024($sp)
+    lw      $s0, 0x0018($sp)
+    lw      $s1, 0x001C($sp)
+    lw      $s2, 0x0020($sp)
+    jr      $ra
+    addiu   $sp, $sp, 0x0048

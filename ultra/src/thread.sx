@@ -1,0 +1,28 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+.globl __osDequeueThread
+__osDequeueThread:
+    move    $a2, $a0
+    lw      $a3, 0x0000($a2)
+    addiu   $sp, $sp, -0x0008
+    beqz    $a3, .L803274C8
+    nop
+.L803274A4:
+    bne     $a3, $a1, .L803274B8
+    nop
+    lw      $t6, 0x0000($a1)
+    b       .L803274C8
+    sw      $t6, 0x0000($a2)
+.L803274B8:
+    move    $a2, $a3
+    lw      $a3, 0x0000($a2)
+    bnez    $a3, .L803274A4
+    nop
+.L803274C8:
+    jr      $ra
+    addiu   $sp, $sp, 0x0008

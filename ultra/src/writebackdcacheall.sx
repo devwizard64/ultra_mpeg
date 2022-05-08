@@ -1,0 +1,21 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void osWritebackDCacheAll(void) */
+.globl osWritebackDCacheAll
+osWritebackDCacheAll:
+    lui     $t0, %hi(0x80000000)
+    li      $t2, 0x2000
+    addu    $t1, $t0, $t2
+    addiu   $t1, $t1, -0x0010
+.L80322F50:
+    cache   0x01, %lo(0x80000000)($t0)
+    sltu    $at, $t0, $t1
+    bnez    $at, .L80322F50
+    addiu   $t0, $t0, 0x0010
+    jr      $ra
+    nop

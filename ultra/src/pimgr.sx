@@ -1,0 +1,113 @@
+#include <ultra64.h>
+
+.set noreorder
+.set noat
+
+.align 4
+
+/* void osCreatePiManager(
+    OSPri pri,
+    OSMesgQueue *cmdQ,
+    OSMesg *cmdBuf,
+    s32 cmdMsgCnt
+) */
+.globl osCreatePiManager
+osCreatePiManager:
+    addiu   $sp, $sp, -0x0030
+    lui     $t6, %hi(__osPiDevMgr+0x00)
+    lw      $t6, %lo(__osPiDevMgr+0x00)($t6)
+    sw      $ra, 0x001C($sp)
+    sw      $a0, 0x0030($sp)
+    sw      $a1, 0x0034($sp)
+    sw      $a2, 0x0038($sp)
+    bnez    $t6, .L803236DC
+    sw      $a3, 0x003C($sp)
+    lw      $a0, 0x0034($sp)
+    lw      $a1, 0x0038($sp)
+    jal     osCreateMesgQueue
+    lw      $a2, 0x003C($sp)
+    lui     $a0, %hi(piEventQueue)
+    lui     $a1, %hi(piEventBuf)
+    addiu   $a1, %lo(piEventBuf)
+    addiu   $a0, %lo(piEventQueue)
+    jal     osCreateMesgQueue
+    li      $a2, 0x0001
+    lui     $t7, %hi(__osPiAccessQueueEnabled)
+    lw      $t7, %lo(__osPiAccessQueueEnabled)($t7)
+    bnez    $t7, .L803235D4
+    nop
+    jal     __osPiCreateAccessQueue
+    nop
+.L803235D4:
+    lui     $a1, %hi(piEventQueue)
+    lui     $a2, 0x22222222 >> 16
+    ori     $a2, 0x22222222 & 0xFFFF
+    addiu   $a1, %lo(piEventQueue)
+    jal     osSetEventMesg
+    li      $a0, 0x0008
+    li      $t8, -0x0001
+    sw      $t8, 0x0028($sp)
+    jal     osGetThreadPri
+    move    $a0, $0
+    sw      $v0, 0x0024($sp)
+    lw      $t9, 0x0024($sp)
+    lw      $t0, 0x0030($sp)
+    slt     $at, $t9, $t0
+    beqz    $at, .L80323624
+    nop
+    sw      $t9, 0x0028($sp)
+    move    $a0, $0
+    jal     osSetThreadPri
+    move    $a1, $t0
+.L80323624:
+    jal     __osDisableInt
+    nop
+    lui     $at, %hi(__osPiDevMgr+0x08)
+    lw      $t3, 0x0034($sp)
+    lui     $t2, %hi(piThread)
+    lui     $t4, %hi(piEventQueue)
+    li      $t1, 0x0001
+    addiu   $t2, %lo(piThread)
+    addiu   $t4, %lo(piEventQueue)
+    lui     $t7, %hi(piThreadStack)
+    lw      $t9, 0x0030($sp)
+    sw      $t1, %lo(__osPiDevMgr+0x00)($at)
+    sw      $t2, %lo(__osPiDevMgr+0x04)($at)
+    sw      $t4, %lo(__osPiDevMgr+0x0C)($at)
+    lui     $t5, %hi(__osPiAccessQueue)
+    lui     $t6, %hi(osPiRawStartDma)
+    addiu   $t7, %lo(piThreadStack)
+    sw      $t3, %lo(__osPiDevMgr+0x08)($at)
+    lui     $at, %hi(__osPiDevMgr+0x14)
+    addiu   $t5, %lo(__osPiAccessQueue)
+    addiu   $t6, %lo(osPiRawStartDma)
+    addiu   $t8, $t7, 0x1000
+    lui     $a2, %hi(__osDevMgrMain)
+    lui     $a3, %hi(__osPiDevMgr+0x00)
+    sw      $v0, 0x002C($sp)
+    sw      $t5, %lo(__osPiDevMgr+0x10)($at)
+    sw      $t6, %lo(__osPiDevMgr+0x14)($at)
+    addiu   $a3, %lo(__osPiDevMgr+0x00)
+    addiu   $a2, %lo(__osDevMgrMain)
+    sw      $t8, 0x0010($sp)
+    move    $a0, $t2
+    move    $a1, $0
+    jal     osCreateThread
+    sw      $t9, 0x0014($sp)
+    lui     $a0, %hi(piThread)
+    jal     osStartThread
+    addiu   $a0, %lo(piThread)
+    jal     __osRestoreInt
+    lw      $a0, 0x002C($sp)
+    lw      $t0, 0x0028($sp)
+    li      $at, -0x0001
+    beq     $t0, $at, .L803236DC
+    nop
+    move    $a0, $0
+    jal     osSetThreadPri
+    move    $a1, $t0
+.L803236DC:
+    lw      $ra, 0x001C($sp)
+    addiu   $sp, $sp, 0x0030
+    jr      $ra
+    nop
