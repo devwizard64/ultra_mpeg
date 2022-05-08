@@ -126,6 +126,12 @@ static void idle_main(void *arg)
     osCreateViManager(OS_PRIORITY_VIMGR);
     osViSetMode(osTvType == OS_TV_NTSC ? &osViModeNtscLan1 : &osViModePalLan1);
     osViBlack(TRUE);
+    osViSetSpecialFeatures(
+        OS_VI_GAMMA_OFF |
+        OS_VI_GAMMA_DITHER_OFF |
+        OS_VI_DIVOT_OFF |
+        OS_VI_DITHER_FILTER_OFF
+    );
     osCreateThread(&thread_app, 2, app_main, NULL, stack_app, 10);
     osStartThread(&thread_app);
     for (;;);
