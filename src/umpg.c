@@ -85,7 +85,7 @@ static const Gfx gfx_umpg_start[] =
         G_TX_CLAMP, G_TX_NOMASK, G_TX_NOLOD
     ),
     gsDPSetConvert(G_CV_K0, G_CV_K1, G_CV_K2, G_CV_K3, G_CV_K4, G_CV_K5),
-    gsDPSetPipelineMode(G_PM_NPRIMITIVE),
+    gsDPPipelineMode(G_PM_NPRIMITIVE),
 #if UMPG_BILERP
     gsDPSetCycleType(G_CYC_2CYCLE),
 #endif
