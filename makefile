@@ -13,7 +13,6 @@ CODE_OBJ := \
 
 LIBC_OBJ := \
 	$(BUILD)/src/libc/abs.o         \
-	$(BUILD)/src/libc/memmove.o     \
 	$(BUILD)/src/libc/memset.o      \
 	$(BUILD)/src/libc/memcmp.o      \
 	$(BUILD)/src/libc/brk.o         \
